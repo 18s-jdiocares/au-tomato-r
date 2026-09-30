@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuTomator - Dark Frutiger Aero Productivity Suite & Bedtime Planner</title>
+    <title>AuTomator - Productivity Suite & Bedtime Planner</title>
 
-    <!-- Tab Favicon with glossy purple-pink squircle and white clock icon -->
+    <!-- Tab Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='aeroGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient><linearGradient id='gloss' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='%23ffffff' stop-opacity='0.45'/><stop offset='50%' stop-color='%23ffffff' stop-opacity='0.05'/><stop offset='100%' stop-color='%23000000' stop-opacity='0.25'/></linearGradient></defs><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23aeroGrad)' stroke='%23ffffff' stroke-opacity='0.35' stroke-width='1.5'/><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23gloss)'/><path d='M20 22h24M20 32h24M20 42h16' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/><circle cx='44' cy='42' r='4' fill='%23ffffff'/></svg>">
 
     <!-- Tailwind CSS CDN -->
@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Font & Core Layout */
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background: #0d0614;
@@ -23,7 +22,6 @@
             overflow-x: hidden;
         }
 
-        /* Suppress browser number input spin buttons */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -34,7 +32,6 @@
             appearance: textfield;
         }
 
-        /* Dark Frutiger Aero Dynamic Backdrop */
         .aero-bg {
             background: 
                 radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.38) 0%, transparent 40%),
@@ -44,7 +41,6 @@
             background-attachment: fixed;
         }
 
-        /* Glossy Glassmorphic Panels */
         .aero-card {
             background: rgba(18, 14, 28, 0.82);
             backdrop-filter: blur(20px);
@@ -61,7 +57,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Glossy Frutiger Buttons */
         .aero-btn {
             background: linear-gradient(180deg, rgba(168, 85, 247, 0.9) 0%, rgba(126, 34, 206, 0.95) 100%);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -96,7 +91,6 @@
             box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4) !important;
         }
 
-        /* Form Inputs */
         .aero-input {
             background: rgba(10, 6, 18, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.15);
@@ -121,7 +115,7 @@
         /* Drag & Drop Visual Styles */
         .draggable-card {
             cursor: grab;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
         }
         .draggable-card:active {
             cursor: grabbing;
@@ -129,7 +123,10 @@
         .draggable-card.dragging {
             opacity: 0.4;
             transform: scale(0.98);
-            border-color: rgba(168, 85, 247, 0.8);
+            border-color: rgba(168, 85, 247, 0.8) !important;
+        }
+        .drag-over {
+            border-top: 3px solid #ec4899 !important;
         }
 
         /* Badges */
@@ -196,12 +193,15 @@
                 </button>
             </div>
 
-            <!-- Live Clock & Actions -->
+            <!-- Actions & Undo -->
             <div class="hidden sm:flex items-center space-x-3">
                 <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <strong id="liveClock" class="text-white font-mono">12:00:00 PM</strong>
                 </div>
+                <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Undo action (Ctrl+Z)">
+                    <i class="fa-solid fa-rotate-left text-purple-300"></i> Undo
+                </button>
                 <button id="loadSampleBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
                     <i class="fa-solid fa-list-check text-purple-300"></i> Sample Data
                 </button>
@@ -212,6 +212,12 @@
         </div>
     </header>
 
+    <!-- Toast Notification for Undo -->
+    <div id="undoToast" class="fixed bottom-5 right-5 z-50 bg-purple-900/90 text-white border border-purple-400/30 px-4 py-2.5 rounded-xl shadow-2xl backdrop-blur-md text-xs font-semibold flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
+        <i class="fa-solid fa-rotate-left text-pink-300"></i>
+        <span id="toastMessage">Action Undone</span>
+    </div>
+
     <!-- Main Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
@@ -220,7 +226,6 @@
         <!-- ========================================================= -->
         <div id="taskAllocatorTab" class="space-y-6">
             
-            <!-- Top Section: Fixed Constraints & Task Allocator Controls -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Left Panel: Fixed Routine Constraints -->
@@ -236,7 +241,7 @@
                             <span class="pill-badge badge-amber"><i class="fa-solid fa-lock text-[10px] text-white"></i> Fixed Events</span>
                         </div>
 
-                        <!-- Timeline Start & Bedtime -->
+                        <!-- Start Work Time & Bedtime -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
@@ -302,7 +307,12 @@
                                 </h2>
                                 <p class="text-xs text-slate-400 mt-0.5">Distributes time proportionally in multiples of 5.</p>
                             </div>
-                            <span class="pill-badge badge-purple"><i class="fa-solid fa-wand-magic-sparkles text-[10px] text-white"></i> Proportional</span>
+                            <div class="flex items-center gap-2">
+                                <button id="syncPomoFocusBtn" onclick="syncPomoFocusToAllocator()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-lg text-pink-300 transition flex items-center gap-1" title="Use calculated Pomodoro focus time as target">
+                                    <i class="fa-solid fa-stopwatch text-purple-300"></i> Use Pomo Focus
+                                </button>
+                                <span class="pill-badge badge-purple"><i class="fa-solid fa-wand-magic-sparkles text-[10px] text-white"></i> Proportional</span>
+                            </div>
                         </div>
 
                         <!-- Total Duration Input -->
@@ -418,7 +428,7 @@
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Master Timeline & Task Schedule</h3>
-                        <p class="text-xs text-slate-400">Chronological view combining fixed routine blocks and allocated task items up to bedtime.</p>
+                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Fixed events and duration-fixed tasks align dynamically.</p>
                     </div>
                     <span id="activeCountBadge" class="pill-badge badge-blue">0 Items</span>
                 </div>
@@ -483,7 +493,7 @@
 
                         <div class="border-t border-white/10 my-4"></div>
 
-                        <!-- Time Sync Mode -->
+                        <!-- Shared Integration Settings -->
                         <div class="space-y-4">
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
@@ -505,6 +515,17 @@
                                     <label class="text-[11px] font-medium text-slate-400 mb-1 block">Specify Custom Start Time:</label>
                                     <input type="time" id="customStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-semibold tracking-wider text-purple-200">
                                 </div>
+                            </div>
+
+                            <!-- Integration Toggle -->
+                            <div class="pt-3 border-t border-white/10">
+                                <label class="flex items-center justify-between cursor-pointer">
+                                    <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-link"></i> Integrate Task Allocator Fixed Events
+                                    </span>
+                                    <input type="checkbox" id="integrateFixedEventsToggle" checked class="w-4 h-4 rounded bg-black/40 border-white/20 text-purple-500 focus:ring-purple-500 cursor-pointer">
+                                </label>
+                                <p class="text-[11px] text-slate-400 mt-1">When checked, fixed events from Task Allocator automatically pause/push Pomodoro sessions.</p>
                             </div>
                         </div>
                     </div>
@@ -559,13 +580,15 @@
                         <div class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5">
                             <div id="ratioFocusBar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-l-full transition-all duration-500" style="width: 0%"></div>
                             <div id="ratioBreakBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500" style="width: 0%"></div>
-                            <div id="ratioBufferBar" class="h-full bg-amber-500/60 rounded-r-full transition-all duration-500" style="width: 0%"></div>
+                            <div id="ratioFixedBar" class="h-full bg-amber-500/80 transition-all duration-500" style="width: 0%"></div>
+                            <div id="ratioBufferBar" class="h-full bg-slate-600/60 rounded-r-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                         <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                            <div class="flex items-center gap-3">
-                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Work Focus</span>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Focus</span>
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Breaks</span>
-                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Remaining Buffer</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Fixed Events</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block"></span> Buffer</span>
                             </div>
                             <div id="bufferTimeText" class="font-mono text-amber-300 font-medium">0m buffer</div>
                         </div>
@@ -578,7 +601,7 @@
                 <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-pink-400"></i> Chronological Session Bar</h3>
-                        <p class="text-xs text-slate-400">Continuous breakdown of every Pomodoro block from start time to bedtime.</p>
+                        <p class="text-xs text-slate-400">Continuous breakdown of every Pomodoro and fixed event block up to bedtime.</p>
                     </div>
                     <span class="pill-badge badge-yellow"><i class="fa-solid fa-bolt text-[10px]"></i> Visual Timeline</span>
                 </div>
@@ -622,6 +645,7 @@
                     <input type="text" id="editModalTitleInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm">
                 </div>
 
+                <!-- Fixed Event Editor -->
                 <div id="fixedEventFields" class="grid grid-cols-2 gap-3 hidden">
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-300">Start Time</label>
@@ -633,6 +657,7 @@
                     </div>
                 </div>
 
+                <!-- Task Editor -->
                 <div id="taskFields" class="space-y-3 hidden">
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-300">Length Rating (Proportional Mode)</label>
@@ -643,11 +668,24 @@
                         </select>
                     </div>
 
-                    <div class="space-y-2 pt-3 border-t border-white/10">
+                    <div class="space-y-3 pt-3 border-t border-white/10">
                         <div class="flex items-center justify-between">
-                            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock text-teal-300"></i> Fixed Time Range</label>
+                            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock text-teal-300"></i> Fixed Task Timing / Duration</label>
                             <button type="button" onclick="clearTaskFixedTimes()" class="text-[11px] text-teal-400 hover:text-teal-200 underline font-medium">Reset to Auto</button>
                         </div>
+
+                        <!-- Standalone Duration Input -->
+                        <div class="space-y-1 bg-black/30 p-2.5 rounded-lg border border-white/10">
+                            <label class="text-[11px] text-teal-200 font-semibold flex items-center justify-between">
+                                <span>Fixed Duration (Minutes)</span>
+                                <span class="text-[10px] text-slate-400">Draggable on timeline</span>
+                            </label>
+                            <input type="number" id="editModalTaskDurationInput" min="1" max="1440" placeholder="e.g. 45" class="aero-input w-full px-3 py-1.5 rounded-lg text-xs font-mono text-teal-200">
+                        </div>
+
+                        <div class="text-center text-[10px] text-slate-500 uppercase tracking-wider font-bold">OR Specific Range</div>
+
+                        <!-- Specific Start & End Range Inputs -->
                         <div class="grid grid-cols-2 gap-3">
                             <div class="space-y-1">
                                 <label class="text-[11px] text-slate-400 font-medium">Start Time</label>
@@ -677,7 +715,7 @@
         AuTomator &bull; Integrated Task Allocator & Pomodoro Bedtime Engine
     </footer>
 
-    <!-- Combined Application Logic JavaScript -->
+    <!-- JavaScript Application Logic -->
     <script>
         // Tab Navigation
         function switchTab(tabName) {
@@ -708,13 +746,15 @@
         bedtimeInput.addEventListener('change', () => {
             pomoBedTimeInput.value = bedtimeInput.value;
             calculateAndRender();
+            calculatePomodoroSchedule();
         });
         pomoBedTimeInput.addEventListener('change', () => {
             bedtimeInput.value = pomoBedTimeInput.value;
+            calculateAndRender();
             calculatePomodoroSchedule();
         });
 
-        // Task Allocator DOM Elements
+        // DOM Elements - Task Allocator
         const totalDurationInput = document.getElementById('totalDurationInput');
         const taskTitleInput = document.getElementById('taskTitleInput');
         const taskRatingSelect = document.getElementById('taskRatingSelect');
@@ -738,7 +778,6 @@
 
         const sumDisplay = document.getElementById('sumDisplay');
         const matchStatusBadge = document.getElementById('matchStatusBadge');
-        const calculationSummarySubtext = document.getElementById('calculationSummarySubtext');
 
         const metricTaskCount = document.getElementById('metricTaskCount');
         const metricTotalWeight = document.getElementById('metricTotalWeight');
@@ -761,6 +800,7 @@
         const editModalEndTimeInput = document.getElementById('editModalEndTimeInput');
         const taskFields = document.getElementById('taskFields');
         const editModalRatingSelect = document.getElementById('editModalRatingSelect');
+        const editModalTaskDurationInput = document.getElementById('editModalTaskDurationInput');
         const editModalTaskStartTimeInput = document.getElementById('editModalTaskStartTimeInput');
         const editModalTaskEndTimeInput = document.getElementById('editModalTaskEndTimeInput');
         const taskDurationPreview = document.getElementById('taskDurationPreview');
@@ -772,6 +812,7 @@
         const sessionsPerCycleInput = document.getElementById('sessionsPerCycle');
         const customStartTimeInput = document.getElementById('customStartTimeInput');
         const customStartTimeWrapper = document.getElementById('customStartTimeWrapper');
+        const integrateFixedEventsToggle = document.getElementById('integrateFixedEventsToggle');
 
         const modeLiveBtn = document.getElementById('modeLiveBtn');
         const modeCustomBtn = document.getElementById('modeCustomBtn');
@@ -789,13 +830,13 @@
 
         const ratioFocusBar = document.getElementById('ratioFocusBar');
         const ratioBreakBar = document.getElementById('ratioBreakBar');
+        const ratioFixedBar = document.getElementById('ratioFixedBar');
         const ratioBufferBar = document.getElementById('ratioBufferBar');
         const timeUtilizationRatio = document.getElementById('timeUtilizationRatio');
         const bufferTimeText = document.getElementById('bufferTimeText');
 
         const pomoTimelineContainer = document.getElementById('pomoTimelineContainer');
         const pomoTimelineStartLabel = document.getElementById('pomoTimelineStartLabel');
-        const pomoTimelineMidLabel = document.getElementById('pomoTimelineMidLabel');
         const pomoTimelineEndLabel = document.getElementById('pomoTimelineEndLabel');
 
         const pomoBlocksList = document.getElementById('pomoBlocksList');
@@ -807,29 +848,27 @@
             { id: 1, title: 'lang', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 2, title: 'nhs', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 3, title: 'jazz', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 4, title: 'knowledge check', rating: 1, completed: false, fixedDuration: 15, fixedStartTime: "17:15", fixedEndTime: "17:30" },
+            { id: 4, title: 'knowledge check', rating: 1, completed: false, fixedDuration: 15, fixedStartTime: null, fixedEndTime: null },
             { id: 5, title: 'titration', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 6, title: 'lewis', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 7, title: 'annotations + space', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 8, title: 'wk5 warmups', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 9, title: 'secrets of the CC', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 10, title: 'discount', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 11, title: 'emerald solo (?)', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 12, title: 'identifying principles', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 13, title: 'brutus', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 14, title: 'wk4 warmups', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null }
+            { id: 10, title: 'discount', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null }
         ];
 
         const sampleEvents = [
-            { id: 101, title: 'Dinner & Break', startTime: '18:30', endTime: '19:15', isFixed: true },
-            { id: 102, title: 'Study Group Call', startTime: '20:15', endTime: '20:45', isFixed: true }
+            { id: 101, title: 'Dinner & Break', startTime: '18:30', endTime: '19:15', duration: 45, isFixed: true },
+            { id: 102, title: 'Study Group Call', startTime: '20:15', endTime: '20:45', duration: 30, isFixed: true }
         ];
 
-        // Shared State
+        // Application State
         let tasks = [...sampleTasks.map(t => ({ ...t }))];
         let fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
-        let draggedTaskId = null;
+        let undoStack = [];
         let isLivePomoMode = true;
+        let lastCalculatedPomoFocusMins = 0;
+        let dragSourceIndex = null;
 
         const colorPalette = [
             'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-cyan-500',
@@ -837,6 +876,47 @@
             'bg-teal-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-sky-500'
         ];
 
+        // State & Undo Management (Ctrl+Z)
+        function pushState() {
+            if (undoStack.length >= 25) undoStack.shift();
+            undoStack.push(JSON.stringify({
+                tasks: tasks,
+                fixedEvents: fixedEvents,
+                totalDuration: totalDurationInput.value
+            }));
+        }
+
+        function undo() {
+            if (undoStack.length === 0) return;
+            const previousState = JSON.parse(undoStack.pop());
+            tasks = previousState.tasks;
+            fixedEvents = previousState.fixedEvents;
+            totalDurationInput.value = previousState.totalDuration;
+            
+            updateFixedEventsUI();
+            calculateAndRender();
+            calculatePomodoroSchedule();
+            showUndoToast("Action Undone");
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                e.preventDefault();
+                undo();
+            }
+        });
+
+        function showUndoToast(msg) {
+            const toast = document.getElementById('undoToast');
+            document.getElementById('toastMessage').textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+            }, 2000);
+        }
+
+        // Time Utility Functions
         function getCurrentTimeStr() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
@@ -863,7 +943,6 @@
             }
         }
 
-        // Live Clock Tick
         setInterval(() => {
             const now = new Date();
             liveClock.textContent = formatTime12H(now);
@@ -889,6 +968,7 @@
         }
 
         function setQuickDuration(val) {
+            pushState();
             totalDurationInput.value = val;
             calculateAndRender();
         }
@@ -924,6 +1004,7 @@
             calculateAndRender();
         });
 
+        // Fixed Events Logic
         addEventBtn.addEventListener('click', () => {
             const title = eventTitleInput.value.trim() || 'Fixed Event';
             const startVal = eventStartTimeInput.value;
@@ -936,10 +1017,12 @@
                 return;
             }
 
+            pushState();
             fixedEvents.push({ id: Date.now(), title, startTime: startVal, endTime: endVal, duration, isFixed: true });
             eventTitleInput.value = '';
             updateFixedEventsUI();
             calculateAndRender();
+            calculatePomodoroSchedule();
         });
 
         function updateFixedEventsUI() {
@@ -971,9 +1054,11 @@
         }
 
         window.removeFixedEvent = function(id) {
+            pushState();
             fixedEvents = fixedEvents.filter(e => e.id !== id);
             updateFixedEventsUI();
             calculateAndRender();
+            calculatePomodoroSchedule();
         };
 
         function calculateAvailableWorkWindow() {
@@ -998,16 +1083,19 @@
         applyWorkTimeBtn.addEventListener('click', () => {
             const avail = calculateAvailableWorkWindow();
             if (avail > 0) {
+                pushState();
                 totalDurationInput.value = avail;
                 calculateAndRender();
             }
         });
 
+        // Add Task Logic
         addTaskBtn.addEventListener('click', () => {
             const title = taskTitleInput.value.trim();
             const rating = getSanitizedInput(taskRatingSelect, 2);
             if (!title) return;
 
+            pushState();
             tasks.push({
                 id: Date.now(),
                 title: title,
@@ -1025,7 +1113,7 @@
             if (e.key === 'Enter') addTaskBtn.click();
         });
 
-        // Modal Management
+        // Edit Modal Logic
         window.openEditModal = function(id, type) {
             editModalItemId.value = id;
             editModalItemType.value = type;
@@ -1045,6 +1133,7 @@
                 editModalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-pink-400"></i> Edit Task Item`;
                 editModalTitleInput.value = task.title;
                 editModalRatingSelect.value = task.rating || 2;
+                editModalTaskDurationInput.value = task.fixedDuration || '';
                 editModalTaskStartTimeInput.value = task.fixedStartTime || '';
                 editModalTaskEndTimeInput.value = task.fixedEndTime || '';
                 updateTaskDurationPreview();
@@ -1059,27 +1148,48 @@
         };
 
         function updateTaskDurationPreview() {
+            const durVal = parseInt(editModalTaskDurationInput.value, 10);
             const startVal = editModalTaskStartTimeInput.value;
             const endVal = editModalTaskEndTimeInput.value;
+
             if (startVal && endVal) {
                 const dur = calculateDurationFromTimes(startVal, endVal);
                 if (dur > 0) {
-                    taskDurationPreview.textContent = `Calculated Fixed Duration: ${dur} mins (${startVal} - ${endVal})`;
+                    taskDurationPreview.textContent = `Calculated Specific Range: ${dur} mins (${startVal} - ${endVal})`;
                     taskDurationPreview.className = "text-xs font-mono text-teal-300 bg-teal-950/60 border border-teal-500/40 rounded-lg p-2 text-center font-bold";
                 } else {
                     taskDurationPreview.textContent = "Invalid range: End time must be after start time";
                     taskDurationPreview.className = "text-xs font-mono text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-lg p-2 text-center font-bold";
                 }
+            } else if (!isNaN(durVal) && durVal > 0) {
+                taskDurationPreview.textContent = `Fixed Standalone Duration: ${durVal} mins (Draggable card position)`;
+                taskDurationPreview.className = "text-xs font-mono text-teal-300 bg-teal-950/60 border border-teal-500/40 rounded-lg p-2 text-center font-bold";
             } else {
                 taskDurationPreview.textContent = "Duration: Auto (Proportional based on weight)";
                 taskDurationPreview.className = "text-xs font-mono text-slate-400 bg-black/40 border border-white/10 rounded-lg p-2 text-center";
             }
         }
 
-        editModalTaskStartTimeInput.addEventListener('input', updateTaskDurationPreview);
-        editModalTaskEndTimeInput.addEventListener('input', updateTaskDurationPreview);
+        editModalTaskDurationInput.addEventListener('input', () => {
+            if (editModalTaskDurationInput.value) {
+                editModalTaskStartTimeInput.value = '';
+                editModalTaskEndTimeInput.value = '';
+            }
+            updateTaskDurationPreview();
+        });
+
+        editModalTaskStartTimeInput.addEventListener('input', () => {
+            if (editModalTaskStartTimeInput.value) editModalTaskDurationInput.value = '';
+            updateTaskDurationPreview();
+        });
+
+        editModalTaskEndTimeInput.addEventListener('input', () => {
+            if (editModalTaskEndTimeInput.value) editModalTaskDurationInput.value = '';
+            updateTaskDurationPreview();
+        });
 
         window.clearTaskFixedTimes = function() {
+            editModalTaskDurationInput.value = '';
             editModalTaskStartTimeInput.value = '';
             editModalTaskEndTimeInput.value = '';
             updateTaskDurationPreview();
@@ -1090,6 +1200,8 @@
             const type = editModalItemType.value;
             const newTitle = editModalTitleInput.value.trim();
             if (!newTitle) return;
+
+            pushState();
 
             if (type === 'FIXED') {
                 const evt = fixedEvents.find(e => e.id === id);
@@ -1107,6 +1219,7 @@
                 if (task) {
                     task.title = newTitle;
                     task.rating = parseInt(editModalRatingSelect.value, 10);
+                    const durVal = parseInt(editModalTaskDurationInput.value, 10);
                     const startVal = editModalTaskStartTimeInput.value;
                     const endVal = editModalTaskEndTimeInput.value;
 
@@ -1116,6 +1229,10 @@
                         task.fixedDuration = dur;
                         task.fixedStartTime = startVal;
                         task.fixedEndTime = endVal;
+                    } else if (!isNaN(durVal) && durVal > 0) {
+                        task.fixedDuration = durVal;
+                        task.fixedStartTime = null;
+                        task.fixedEndTime = null;
                     } else {
                         task.fixedDuration = null;
                         task.fixedStartTime = null;
@@ -1125,9 +1242,22 @@
             }
             closeEditModal();
             calculateAndRender();
+            calculatePomodoroSchedule();
         };
 
-        // Allocation Engine
+        // Sync Pomodoro Calculated Focus Time into Task Allocator
+        function syncPomoFocusToAllocator() {
+            if (lastCalculatedPomoFocusMins > 0) {
+                pushState();
+                totalDurationInput.value = lastCalculatedPomoFocusMins;
+                calculateAndRender();
+                showUndoToast(`Synced ${lastCalculatedPomoFocusMins}m Focus Time`);
+            } else {
+                alert("Please calculate a valid Pomodoro schedule first.");
+            }
+        }
+
+        // Proportional Allocation Logic
         function allocateTaskTimes() {
             const targetTotal = getSanitizedInput(totalDurationInput, 0);
             if (tasks.length === 0 || targetTotal <= 0) {
@@ -1327,9 +1457,12 @@
                     let ratingLabel = item.rating === 3 ? '3x Long' : (item.rating === 2 ? '2x Medium' : '1x Short');
                     const isFixedTask = item.fixedDuration !== null && item.fixedDuration > 0;
 
+                    const originalIndex = tasks.findIndex(t => t.id === item.id);
+
                     card.className = `draggable-card aero-card p-4 space-y-2.5 relative flex flex-col justify-between transition hover:border-white/30 ${item.completed ? 'opacity-50' : ''}`;
                     card.setAttribute('draggable', 'true');
                     card.setAttribute('data-id', item.id);
+                    card.setAttribute('data-index', originalIndex);
 
                     card.innerHTML = `
                         <div class="flex items-center justify-between gap-2">
@@ -1341,7 +1474,7 @@
                             <div class="flex items-center gap-2 shrink-0">
                                 <button onclick="openEditModal(${item.id}, 'TASK')" class="pill-badge ${isFixedTask ? 'badge-teal' : 'aero-btn-secondary text-slate-300'} cursor-pointer">
                                     <i class="fa-solid ${isFixedTask ? 'fa-clock' : 'fa-wand-magic-sparkles'} text-[10px]"></i>
-                                    ${isFixedTask ? `Fixed (${item.fixedStartTime ? item.fixedStartTime + '-' + item.fixedEndTime : item.fixedDuration + 'm'})` : 'Auto Time'}
+                                    ${isFixedTask ? (item.fixedStartTime ? `Fixed (${item.fixedStartTime}-${item.fixedEndTime})` : `Fixed (${item.fixedDuration}m)`) : 'Auto Time'}
                                 </button>
                                 <span class="pill-badge ${ratingBadge}">${ratingLabel}</span>
                             </div>
@@ -1361,9 +1494,44 @@
                         </div>
                     `;
 
+                    // Drag & Drop Handlers
+                    card.addEventListener('dragstart', (e) => {
+                        dragSourceIndex = originalIndex;
+                        card.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+
+                    card.addEventListener('dragend', () => {
+                        card.classList.remove('dragging');
+                        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                    });
+
+                    card.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        card.classList.add('drag-over');
+                    });
+
+                    card.addEventListener('dragleave', () => {
+                        card.classList.remove('drag-over');
+                    });
+
+                    card.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        card.classList.remove('drag-over');
+                        if (dragSourceIndex === null || dragSourceIndex === originalIndex) return;
+
+                        pushState();
+                        const movedItem = tasks.splice(dragSourceIndex, 1)[0];
+                        tasks.splice(originalIndex, 0, movedItem);
+                        dragSourceIndex = null;
+                        calculateAndRender();
+                    });
+
                     const checkbox = card.querySelector(`#check-${item.id}`);
                     if (checkbox) {
                         checkbox.addEventListener('change', (e) => {
+                            pushState();
                             const found = tasks.find(t => t.id === item.id);
                             if (found) {
                                 found.completed = e.target.checked;
@@ -1377,6 +1545,7 @@
         }
 
         window.removeTask = function(id) {
+            pushState();
             tasks = tasks.filter(t => t.id !== id);
             calculateAndRender();
         };
@@ -1387,7 +1556,7 @@
             });
         }
 
-        // Pomodoro Engine Code
+        // Pomodoro Engine Logic with Fixed Events Integration
         modeLiveBtn.addEventListener('click', () => {
             isLivePomoMode = true;
             modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
@@ -1408,11 +1577,14 @@
             calculatePomodoroSchedule();
         });
 
+        integrateFixedEventsToggle.addEventListener('change', calculatePomodoroSchedule);
+
         function calculatePomodoroSchedule() {
             const workMin = Math.max(1, parseInt(workDurationInput.value) || 25);
             const shortBreakMin = Math.max(0, parseInt(shortBreakDurationInput.value) || 5);
             const longBreakMin = Math.max(0, parseInt(longBreakDurationInput.value) || 15);
             const sessionsPerCycle = Math.max(1, parseInt(sessionsPerCycleInput.value) || 4);
+            const integrateEvents = integrateFixedEventsToggle.checked;
 
             let startTime = new Date();
             if (!isLivePomoMode && customStartTimeInput.value) {
@@ -1443,6 +1615,20 @@
                 return;
             }
 
+            // Build sorted list of fixed events
+            let activeEvents = [];
+            if (integrateEvents && fixedEvents.length > 0) {
+                activeEvents = fixedEvents.map(evt => {
+                    const [sh, sm] = evt.startTime.split(':').map(Number);
+                    let evtStart = new Date(startTime.getTime());
+                    evtStart.setHours(sh, sm, 0, 0);
+                    if (evtStart < startTime) evtStart.setDate(evtStart.getDate() + 1);
+                    let dur = evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime);
+                    let evtEnd = new Date(evtStart.getTime() + dur * 60 * 1000);
+                    return { ...evt, eventStart: evtStart, eventEnd: evtEnd, duration: dur };
+                }).filter(e => e.eventStart < bedtime).sort((a, b) => a.eventStart - b.eventStart);
+            }
+
             const scheduleBlocks = [];
             let currentTimeCursor = new Date(startTime);
             let workSessionCounter = 0;
@@ -1450,14 +1636,40 @@
 
             let totalFocusMins = 0;
             let totalBreakMins = 0;
+            let totalFixedMins = 0;
             let activeBlockAtBedtime = null;
 
             while (currentTimeCursor < bedtime) {
+                // Check for upcoming fixed event starting at current cursor
+                let matchingFixed = activeEvents.find(e => e.eventStart <= currentTimeCursor && e.eventEnd > currentTimeCursor);
+
+                if (matchingFixed) {
+                    let eventEnd = matchingFixed.eventEnd < bedtime ? matchingFixed.eventEnd : bedtime;
+                    let dur = Math.round((eventEnd - currentTimeCursor) / (60 * 1000));
+
+                    scheduleBlocks.push({
+                        id: scheduleBlocks.length + 1,
+                        type: `Fixed: ${matchingFixed.title}`,
+                        isWork: false,
+                        isBreak: false,
+                        isFixed: true,
+                        duration: dur,
+                        startTime: new Date(currentTimeCursor),
+                        endTime: eventEnd
+                    });
+
+                    totalFixedMins += dur;
+                    currentTimeCursor = eventEnd;
+                    continue;
+                }
+
+                // Normal Pomodoro block generation
                 let isWork = false;
                 let blockType = "";
                 let durationMins = 0;
 
-                if (scheduleBlocks.length === 0 || scheduleBlocks[scheduleBlocks.length - 1].isBreak) {
+                const lastBlock = scheduleBlocks[scheduleBlocks.length - 1];
+                if (!lastBlock || lastBlock.isBreak || lastBlock.isFixed) {
                     isWork = true;
                     workSessionCounter++;
                     currentCycleSession++;
@@ -1474,33 +1686,48 @@
                     }
                 }
 
-                let blockEnd = new Date(currentTimeCursor.getTime() + durationMins * 60 * 1000);
+                let plannedEnd = new Date(currentTimeCursor.getTime() + durationMins * 60 * 1000);
 
-                if (currentTimeCursor <= bedtime && blockEnd > bedtime) {
-                    activeBlockAtBedtime = {
-                        type: blockType,
-                        isWork: isWork,
-                        minsCompleted: Math.round((bedtime - currentTimeCursor) / (60 * 1000)),
-                        durationMins: durationMins,
-                        endTime: blockEnd
-                    };
+                // Truncate block if a fixed event intersects
+                let nextFixed = activeEvents.find(e => e.eventStart > currentTimeCursor && e.eventStart < plannedEnd);
+                if (nextFixed) {
+                    plannedEnd = nextFixed.eventStart;
+                    durationMins = Math.round((plannedEnd - currentTimeCursor) / (60 * 1000));
                 }
 
-                scheduleBlocks.push({
-                    id: scheduleBlocks.length + 1,
-                    type: blockType,
-                    isWork,
-                    isBreak: !isWork,
-                    duration: durationMins,
-                    startTime: new Date(currentTimeCursor),
-                    endTime: blockEnd
-                });
+                if (durationMins > 0) {
+                    let actualEnd = plannedEnd < bedtime ? plannedEnd : bedtime;
+                    let actualDuration = Math.round((actualEnd - currentTimeCursor) / (60 * 1000));
 
-                if (isWork) totalFocusMins += durationMins;
-                else totalBreakMins += durationMins;
+                    if (currentTimeCursor <= bedtime && actualEnd >= bedtime) {
+                        activeBlockAtBedtime = {
+                            type: blockType,
+                            isWork: isWork,
+                            minsCompleted: actualDuration,
+                            durationMins: durationMins,
+                            endTime: actualEnd
+                        };
+                    }
 
-                currentTimeCursor = blockEnd;
+                    scheduleBlocks.push({
+                        id: scheduleBlocks.length + 1,
+                        type: blockType,
+                        isWork,
+                        isBreak: !isWork,
+                        isFixed: false,
+                        duration: actualDuration,
+                        startTime: new Date(currentTimeCursor),
+                        endTime: actualEnd
+                    });
+
+                    if (isWork) totalFocusMins += actualDuration;
+                    else totalBreakMins += actualDuration;
+
+                    currentTimeCursor = actualEnd;
+                }
             }
+
+            lastCalculatedPomoFocusMins = totalFocusMins;
 
             // Headline Output
             if (activeBlockAtBedtime) {
@@ -1513,10 +1740,10 @@
                 }
             } else {
                 bedtimeStatusTitle.textContent = `Bedtime aligned perfectly!`;
-                bedtimeStatusSubtext.textContent = `Your final session concludes right at ${formatTimeShort(bedtime)}.`;
+                bedtimeStatusSubtext.textContent = `Your schedule completes right at ${formatTimeShort(bedtime)}.`;
             }
 
-            const totalUsedMins = totalFocusMins + totalBreakMins;
+            const totalUsedMins = totalFocusMins + totalBreakMins + totalFixedMins;
             const bufferMins = Math.max(0, totalAvailableMinutes - totalUsedMins);
 
             const hours = Math.floor(totalAvailableMinutes / 60);
@@ -1528,11 +1755,14 @@
 
             const focusPct = Math.min(100, Math.round((totalFocusMins / totalAvailableMinutes) * 100));
             const breakPct = Math.min(100 - focusPct, Math.round((totalBreakMins / totalAvailableMinutes) * 100));
-            const bufferPct = Math.max(0, 100 - focusPct - breakPct);
+            const fixedPct = Math.min(100 - focusPct - breakPct, Math.round((totalFixedMins / totalAvailableMinutes) * 100));
+            const bufferPct = Math.max(0, 100 - focusPct - breakPct - fixedPct);
 
             ratioFocusBar.style.width = `${focusPct}%`;
             ratioBreakBar.style.width = `${breakPct}%`;
+            ratioFixedBar.style.width = `${fixedPct}%`;
             ratioBufferBar.style.width = `${bufferPct}%`;
+
             timeUtilizationRatio.textContent = `${focusPct}% Productive Focus`;
             bufferTimeText.textContent = `${bufferMins}m buffer`;
 
@@ -1553,7 +1783,9 @@
                 const durationMs = block.endTime - block.startTime;
                 const widthPct = Math.max(1, (durationMs / totalMs) * 100);
 
-                seg.className = `h-full rounded transition-all cursor-pointer hover:brightness-125 ${block.isWork ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'}`;
+                let bgClass = block.isWork ? 'bg-gradient-to-r from-purple-500 to-pink-500' : (block.isFixed ? 'bg-amber-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500');
+
+                seg.className = `h-full rounded transition-all cursor-pointer hover:brightness-125 ${bgClass}`;
                 seg.style.width = `${widthPct}%`;
                 seg.title = `${block.type} (${block.duration} mins) [${formatTimeShort(block.startTime)} - ${formatTimeShort(block.endTime)}]`;
                 pomoTimelineContainer.appendChild(seg);
@@ -1562,18 +1794,20 @@
 
         function renderPomoBlocksList(blocks, bedtime) {
             pomoBlocksList.innerHTML = '';
-            pomoTotalBlockCountBadge.textContent = `${blocks.length} Sessions`;
+            pomoTotalBlockCountBadge.textContent = `${blocks.length} Blocks`;
 
             blocks.forEach(block => {
                 const card = document.createElement('div');
                 const isPastBedtime = block.startTime >= bedtime;
-                const isCurrentBedtimeBlock = block.startTime < bedtime && block.endTime > bedtime;
 
-                card.className = `aero-card p-3 space-y-1.5 text-xs ${isPastBedtime ? 'opacity-40 border-rose-500/30' : (isCurrentBedtimeBlock ? 'border-amber-400 bg-amber-950/20' : '')}`;
+                let badgeStyle = block.isWork ? 'badge-purple' : (block.isFixed ? 'badge-amber' : 'badge-blue');
+                let iconClass = block.isWork ? 'fa-briefcase' : (block.isFixed ? 'fa-lock' : 'fa-mug-hot');
+
+                card.className = `aero-card p-3 space-y-1.5 text-xs ${isPastBedtime ? 'opacity-40 border-rose-500/30' : ''}`;
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="pill-badge ${block.isWork ? 'badge-purple' : 'badge-blue'} text-[10px]">
-                            <i class="fa-solid ${block.isWork ? 'fa-briefcase' : 'fa-mug-hot'} text-[9px]"></i> ${block.type}
+                        <span class="pill-badge ${badgeStyle} text-[10px]">
+                            <i class="fa-solid ${iconClass} text-[9px]"></i> ${escapeHtml(block.type)}
                         </span>
                         <span class="font-mono text-slate-400 text-[11px]">${block.duration}m</span>
                     </div>
@@ -1585,25 +1819,29 @@
             });
         }
 
-        // Global Event Listeners
+        // Event Listeners
         totalDurationInput.addEventListener('input', calculateAndRender);
         startTimeInput.addEventListener('change', calculateAndRender);
         calculateBtn.addEventListener('click', calculateAndRender);
         recalculatePomoBtn.addEventListener('click', calculatePomodoroSchedule);
 
         loadSampleBtn.addEventListener('click', () => {
+            pushState();
             tasks = [...sampleTasks.map(t => ({ ...t }))];
             fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
             totalDurationInput.value = 205;
             updateFixedEventsUI();
             calculateAndRender();
+            calculatePomodoroSchedule();
         });
 
         resetAllBtn.addEventListener('click', () => {
+            pushState();
             tasks = [];
             fixedEvents = [];
             updateFixedEventsUI();
             calculateAndRender();
+            calculatePomodoroSchedule();
         });
 
         copyListBtn.addEventListener('click', () => {
@@ -1631,7 +1869,7 @@
             URL.revokeObjectURL(url);
         });
 
-        // Load Defaults
+        // Initialize Defaults
         window.addEventListener('DOMContentLoaded', initDefaults);
     </script>
 </body>

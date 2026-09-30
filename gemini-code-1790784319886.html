@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Frutiger Aero - Productivity Suite & Bedtime Planner</title>
+
+    <!-- Tab Favicon with glossy purple-pink squircle and white clock icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='aeroGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient><linearGradient id='gloss' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='%23ffffff' stop-opacity='0.45'/><stop offset='50%' stop-color='%23ffffff' stop-opacity='0.05'/><stop offset='100%' stop-color='%23000000' stop-opacity='0.25'/></linearGradient></defs><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23aeroGrad)' stroke='%23ffffff' stroke-opacity='0.35' stroke-width='1.5'/><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23gloss)'/><path d='M20 22h24M20 32h24M20 42h16' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/><circle cx='44' cy='42' r='4' fill='%23ffffff'/></svg>">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Font & Core Layout */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #0d0614;
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Suppress browser number input spin buttons */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Dark Frutiger Aero Dynamic Backdrop */
+        .aero-bg {
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(168, 85, 247, 0.38) 0%, transparent 40%),
+                radial-gradient(circle at 85% 25%, rgba(236, 72, 153, 0.35) 0%, transparent 45%),
+                radial-gradient(circle at 50% 75%, rgba(99, 102, 241, 0.35) 0%, transparent 50%),
+                linear-gradient(135deg, #0b0312 0%, #1a0b2e 50%, #0d031b 100%);
+            background-attachment: fixed;
+        }
+
+        /* Glossy Glassmorphic Panels */
+        .aero-card {
+            background: rgba(18, 14, 28, 0.82);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 
+                0 10px 30px -5px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+        }
+
+        .aero-card-header {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Glossy Frutiger Buttons */
+        .aero-btn {
+            background: linear-gradient(180deg, rgba(168, 85, 247, 0.9) 0%, rgba(126, 34, 206, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 4px 12px rgba(147, 51, 234, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .aero-btn:hover {
+            background: linear-gradient(180deg, rgba(192, 132, 252, 0.95) 0%, rgba(147, 51, 234, 1) 100%);
+            box-shadow: 
+                0 6px 18px rgba(147, 51, 234, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .aero-btn-secondary {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .aero-btn-secondary:hover {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .aero-btn-active {
+            background: linear-gradient(180deg, rgba(236, 72, 153, 0.9) 0%, rgba(190, 24, 93, 0.95) 100%) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
+            box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4) !important;
+        }
+
+        /* Form Inputs */
+        .aero-input {
+            background: rgba(10, 6, 18, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .aero-input:focus {
+            outline: none;
+            border-color: rgba(168, 85, 247, 0.8);
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 12px rgba(168, 85, 247, 0.4);
+        }
+
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) sepia(1) saturate(5) hue-rotate(240deg);
+            cursor: pointer;
+        }
+
+        /* Drag & Drop Visual Styles */
+        .draggable-card {
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .draggable-card:active {
+            cursor: grabbing;
+        }
+        .draggable-card.dragging {
+            opacity: 0.4;
+            transform: scale(0.98);
+            border-color: rgba(168, 85, 247, 0.8);
+        }
+
+        /* Badges */
+        .pill-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 5px rgba(0,0,0,0.3);
+            letter-spacing: 0.02em;
+        }
+
+        .badge-yellow { background: #eab308; color: #1e1b4b; }
+        .badge-orange { background: #f97316; color: #ffffff; }
+        .badge-purple { background: #a855f7; color: #ffffff; }
+        .badge-green { background: #22c55e; color: #052e16; }
+        .badge-blue { background: #3b82f6; color: #ffffff; }
+        .badge-amber { background: #d97706; color: #ffffff; }
+        .badge-red { background: #ef4444; color: #ffffff; }
+        .badge-teal { background: #14b8a6; color: #ffffff; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 10, 25, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.5);
+        }
+    </style>
+</head>
+<body class="aero-bg flex flex-col min-h-screen text-slate-100 antialiased">
+
+    <!-- Navigation Header -->
+    <header class="w-full border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 border border-white/30">
+                    <i class="fa-solid fa-clock-rotate-left text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        Aero Schedule & Pomodoro Suite <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Dark Frutiger</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- View Switcher Tabs -->
+            <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/10">
+                <button id="tabTaskBtn" onclick="switchTab('tasks')" class="aero-btn-active text-xs font-semibold px-3.5 py-1.5 rounded-lg text-white transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-pink-200"></i> Task Allocator
+                </button>
+                <button id="tabPomoBtn" onclick="switchTab('pomodoro')" class="aero-btn-secondary text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-300 transition flex items-center gap-1.5 ml-1">
+                    <i class="fa-solid fa-stopwatch text-purple-300"></i> Pomodoro Bedtime
+                </button>
+            </div>
+
+            <!-- Live Clock & Actions -->
+            <div class="hidden sm:flex items-center space-x-3">
+                <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <strong id="liveClock" class="text-white font-mono">12:00:00 PM</strong>
+                </div>
+                <button id="loadSampleBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-list-check text-purple-300"></i> Sample Data
+                </button>
+                <button id="resetAllBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-300 hover:text-rose-200">
+                    <i class="fa-solid fa-trash-can text-rose-400"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: TASK ALLOCATOR & MASTER TIMELINE ENGINE           -->
+        <!-- ========================================================= -->
+        <div id="taskAllocatorTab" class="space-y-6">
+            
+            <!-- Top Section: Fixed Constraints & Task Allocator Controls -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Fixed Routine Constraints -->
+                <div class="lg:col-span-6 aero-card p-5 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
+                            <div>
+                                <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
+                                    <i class="fa-solid fa-calendar-day text-amber-300"></i> Fixed Schedule Constraints
+                                </h2>
+                                <p class="text-xs text-slate-400 mt-0.5">Fixed events (Bedtime, Meetings, Dinner) tasks slot around.</p>
+                            </div>
+                            <span class="pill-badge badge-amber"><i class="fa-solid fa-lock text-[10px] text-white"></i> Fixed Events</span>
+                        </div>
+
+                        <!-- Timeline Start & Bedtime -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-play text-emerald-400"></i> Start Work Time
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer text-xs text-emerald-300 font-medium">
+                                    <input type="checkbox" id="autoStartToggle" checked class="w-3.5 h-3.5 rounded bg-black/40 border-white/20 text-purple-500 focus:ring-purple-500 cursor-pointer">
+                                    <span>Auto Start (Now)</span>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="space-y-1">
+                                    <input type="time" id="startTimeInput" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-emerald-300">
+                                </div>
+                                <div class="space-y-1">
+                                    <input type="time" id="bedtimeInput" value="23:00" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-purple-300" title="Target Bedtime">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Fixed Event -->
+                        <div class="space-y-2 pt-3 border-t border-white/10">
+                            <label class="text-xs font-semibold text-slate-300 block">Add Fixed Event / Routine Block</label>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                <input type="text" id="eventTitleInput" placeholder="Event Name (e.g. Dinner, Class)" class="sm:col-span-5 aero-input px-3 py-2 rounded-lg text-xs">
+                                <div class="sm:col-span-3 flex items-center gap-1">
+                                    <input type="time" id="eventStartTimeInput" class="aero-input w-full px-2 py-2 rounded-lg text-xs font-mono text-amber-200" title="Start Time">
+                                </div>
+                                <div class="sm:col-span-3 flex items-center gap-1">
+                                    <input type="time" id="eventEndTimeInput" class="aero-input w-full px-2 py-2 rounded-lg text-xs font-mono text-amber-200" title="End Time">
+                                </div>
+                                <button id="addEventBtn" class="sm:col-span-1 aero-btn py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center" title="Add Fixed Event">
+                                    <i class="fa-solid fa-plus text-white"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Fixed Events List -->
+                        <div id="fixedEventsContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <!-- Calculated Work Window -->
+                    <div class="bg-black/30 border border-white/10 rounded-xl p-3 flex items-center justify-between">
+                        <div>
+                            <div class="text-[11px] text-slate-400 font-medium">Calculated Free Work Time Window</div>
+                            <div id="calculatedWorkTimeText" class="text-xs text-amber-300 font-semibold mt-0.5">0 hours 0 mins available</div>
+                        </div>
+                        <button id="applyWorkTimeBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg text-purple-200 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-right text-pink-400"></i> Sync To Allocator
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Task Allocation Input -->
+                <div class="lg:col-span-6 aero-card p-5 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
+                            <div>
+                                <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders text-pink-400"></i> Task Allocator Engine
+                                </h2>
+                                <p class="text-xs text-slate-400 mt-0.5">Distributes time proportionally in multiples of 5.</p>
+                            </div>
+                            <span class="pill-badge badge-purple"><i class="fa-solid fa-wand-magic-sparkles text-[10px] text-white"></i> Proportional</span>
+                        </div>
+
+                        <!-- Total Duration Input -->
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                <span class="text-pink-300 flex items-center gap-1.5">Total Work Duration to Allocate</span>
+                                <span class="text-slate-400 text-[11px]">Minutes</span>
+                            </label>
+                            <div class="relative flex items-center">
+                                <input type="number" id="totalDurationInput" min="1" max="1440" value="205" placeholder="e.g. 205" class="aero-input w-full pl-4 pr-11 py-2.5 rounded-xl text-lg font-bold text-pink-200 tracking-wider">
+                                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-pink-300 text-base pointer-events-none flex items-center justify-center">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Presets -->
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] text-slate-400 font-medium">Quick Presets:</span>
+                                <button onclick="setQuickDuration(60)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">60m</button>
+                                <button onclick="setQuickDuration(120)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">120m</button>
+                                <button onclick="setQuickDuration(205)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">205m</button>
+                                <button onclick="setQuickDuration(300)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">300m</button>
+                            </div>
+                        </div>
+
+                        <!-- Add Task Form -->
+                        <div class="space-y-3 pt-3 border-t border-white/10">
+                            <label class="text-xs font-semibold text-slate-300 block">Add Task Item</label>
+                            <div class="space-y-2">
+                                <input type="text" id="taskTitleInput" placeholder="Task Title (e.g. Lang - Lewis, Titration...)" class="aero-input w-full px-3 py-2 rounded-lg text-xs">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div class="space-y-1 sm:col-span-2">
+                                        <label class="text-[11px] text-slate-400 font-medium">Length Rating</label>
+                                        <select id="taskRatingSelect" class="aero-input w-full px-3 py-2 rounded-lg text-xs font-medium">
+                                            <option value="1">1 - Short (1x Weight)</option>
+                                            <option value="2" selected>2 - Medium (2x Weight)</option>
+                                            <option value="3">3 - Long (3x Weight)</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-end sm:col-span-1">
+                                        <button id="addTaskBtn" class="aero-btn w-full py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center gap-1.5">
+                                            <i class="fa-solid fa-plus text-white"></i> Add Task
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="calculateBtn" class="aero-btn w-full py-3 rounded-xl text-white font-extrabold text-sm tracking-wide flex items-center justify-center gap-2 mt-4 shadow-lg shadow-purple-900/40">
+                        <i class="fa-solid fa-rotate text-xs text-purple-200"></i> Recalculate Schedule & Allocations
+                    </button>
+                </div>
+            </div>
+
+            <!-- Allocation Summary Banner -->
+            <div class="aero-card p-6 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="pill-badge badge-purple"><i class="fa-solid fa-equals text-white"></i> EXACT SUM ENGINE</span>
+                            <span id="matchStatusBadge" class="pill-badge badge-green"><i class="fa-solid fa-circle-check text-emerald-950"></i> EXACT MATCH</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Total Target vs Allocated</div>
+                            <h2 id="sumDisplay" class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white font-mono">0 / 205 mins</h2>
+                            <p id="calculationSummarySubtext" class="text-xs text-slate-300 pt-1 leading-relaxed">Every task duration is rounded to a multiple of 5 based on weight standard proportional distribution.</p>
+                        </div>
+                    </div>
+
+                    <!-- Metric Breakdown Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
+                            <div class="text-[11px] text-slate-400 font-medium">Task Count</div>
+                            <div id="metricTaskCount" class="text-base font-bold text-white font-mono mt-0.5">0</div>
+                        </div>
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
+                            <div class="text-[11px] text-slate-400 font-medium">Total Weight</div>
+                            <div id="metricTotalWeight" class="text-base font-bold text-purple-300 font-mono mt-0.5">0x</div>
+                        </div>
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
+                            <div class="text-[11px] text-slate-400 font-medium">Base Unit (1x)</div>
+                            <div id="metricBaseUnit" class="text-base font-bold text-emerald-400 font-mono mt-0.5">0m</div>
+                        </div>
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
+                            <div class="text-[11px] text-slate-400 font-medium">Rounding Delta</div>
+                            <div id="metricDelta" class="text-base font-bold text-pink-400 font-mono mt-0.5">0m</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Visual Bar -->
+                <div class="mt-5 pt-4 border-t border-white/10 space-y-2">
+                    <div class="flex items-center justify-between text-xs font-semibold">
+                        <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-column text-pink-300"></i> Master Schedule Block Distribution</span>
+                        <span id="completionProgressText" class="text-slate-400 font-mono">0 / 0 Completed</span>
+                    </div>
+                    <div id="stackedAllocationBar" class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5"></div>
+                    <div class="flex items-center justify-between pt-1">
+                        <div class="text-[11px] text-slate-400 flex items-center gap-1">Multiples of 5 verified <i class="fa-solid fa-check text-emerald-400 ml-0.5"></i></div>
+                        <div class="flex items-center gap-2">
+                            <button id="copyListBtn" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule</button>
+                            <button id="exportTxtBtn" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-download text-pink-300 mr-1"></i> Export TXT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Chronological Timeline Container -->
+            <div class="aero-card p-5 space-y-4">
+                <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Master Timeline & Task Schedule</h3>
+                        <p class="text-xs text-slate-400">Chronological view combining fixed routine blocks and allocated task items up to bedtime.</p>
+                    </div>
+                    <span id="activeCountBadge" class="pill-badge badge-blue">0 Items</span>
+                </div>
+                <div id="masterTimelineContainer" class="space-y-3 min-h-[160px]"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: POMODORO BEDTIME PLANNER                           -->
+        <!-- ========================================================= -->
+        <div id="pomodoroPlannerTab" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Pomodoro Controls -->
+                <div class="lg:col-span-5 aero-card p-5 space-y-5 flex flex-col justify-between">
+                    <div>
+                        <div class="aero-card-header -mx-5 -mt-5 p-4 mb-4 flex items-center justify-between">
+                            <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-purple-400"></i> Pomodoro Configuration
+                            </h2>
+                            <span class="pill-badge badge-purple"><i class="fa-solid fa-gear text-[10px]"></i> Presets</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Work Duration</span><span class="text-purple-400 text-[11px]">mins</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="workDuration" min="1" max="180" value="25" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
+                                    <i class="fa-solid fa-briefcase absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Short Break</span><span class="text-emerald-400 text-[11px]">mins</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="shortBreakDuration" min="1" max="60" value="5" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
+                                    <i class="fa-solid fa-mug-hot absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Long Break</span><span class="text-blue-400 text-[11px]">mins</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="longBreakDuration" min="1" max="120" value="15" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
+                                    <i class="fa-solid fa-couch absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span>Long Break Interval</span><span class="text-amber-400 text-[11px]">sessions</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" id="sessionsPerCycle" min="1" max="12" value="4" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
+                                    <i class="fa-solid fa-repeat absolute right-3 top-2.5 text-slate-500 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-white/10 my-4"></div>
+
+                        <!-- Time Sync Mode -->
+                        <div class="space-y-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                    <span class="text-pink-300 flex items-center gap-1.5"><i class="fa-solid fa-bed"></i> Target Bedtime</span>
+                                </label>
+                                <input type="time" id="pomoBedTimeInput" value="23:00" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-semibold tracking-wider text-pink-200">
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock"></i> Start Time Mode</label>
+                                    <span id="timeSyncStatus" class="text-[10px] text-emerald-400 font-mono">● LIVE SYNC</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-white/10">
+                                    <button id="modeLiveBtn" class="py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition"><i class="fa-solid fa-play text-[10px] mr-1"></i> Live Now</button>
+                                    <button id="modeCustomBtn" class="py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition"><i class="fa-solid fa-pen text-[10px] mr-1"></i> Custom</button>
+                                </div>
+                                <div id="customStartTimeWrapper" class="hidden pt-1">
+                                    <label class="text-[11px] font-medium text-slate-400 mb-1 block">Specify Custom Start Time:</label>
+                                    <input type="time" id="customStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-semibold tracking-wider text-purple-200">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="recalculatePomoBtn" class="aero-btn w-full py-2.5 rounded-xl text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate Schedule
+                    </button>
+                </div>
+
+                <!-- Right Panel: Executive Bedtime Arrival Summary -->
+                <div class="lg:col-span-7 flex flex-col gap-6">
+                    <div class="aero-card p-6 relative overflow-hidden flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="pill-badge badge-purple"><i class="fa-solid fa-moon"></i> BEDTIME ARRIVAL STATE</span>
+                                <span id="effectiveStartTimeTag" class="text-xs font-mono text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/10">Starts: 00:00</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Status at Bedtime</div>
+                                <h2 id="bedtimeStatusTitle" class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white">Calculating cycle...</h2>
+                                <p id="bedtimeStatusSubtext" class="text-sm text-slate-300 leading-relaxed">Enter your preferred Pomodoro times and target bedtime to compute your schedule.</p>
+                            </div>
+                        </div>
+
+                        <!-- Metric Quick Cards Row -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+                            <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center">
+                                <div class="text-[11px] text-slate-400 font-medium">Total Time</div>
+                                <div id="metricTotalTime" class="text-base font-bold text-white font-mono mt-0.5">0h 0m</div>
+                            </div>
+                            <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center">
+                                <div class="text-[11px] text-slate-400 font-medium">Work Sessions</div>
+                                <div id="metricWorkSessions" class="text-base font-bold text-purple-300 font-mono mt-0.5">0</div>
+                            </div>
+                            <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center">
+                                <div class="text-[11px] text-slate-400 font-medium">Focus Time</div>
+                                <div id="metricFocusTime" class="text-base font-bold text-emerald-400 font-mono mt-0.5">0m</div>
+                            </div>
+                            <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center">
+                                <div class="text-[11px] text-slate-400 font-medium">Break Time</div>
+                                <div id="metricBreakTime" class="text-base font-bold text-blue-400 font-mono mt-0.5">0m</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Utilization Ratio Bar -->
+                    <div class="aero-card p-5 space-y-3">
+                        <div class="flex items-center justify-between text-xs font-semibold">
+                            <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-pink-400"></i> Time Distribution Breakdown</span>
+                            <span id="timeUtilizationRatio" class="text-slate-400 font-mono">0% Productive</span>
+                        </div>
+                        <div class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5">
+                            <div id="ratioFocusBar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-l-full transition-all duration-500" style="width: 0%"></div>
+                            <div id="ratioBreakBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500" style="width: 0%"></div>
+                            <div id="ratioBufferBar" class="h-full bg-amber-500/60 rounded-r-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Work Focus</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Breaks</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Remaining Buffer</span>
+                            </div>
+                            <div id="bufferTimeText" class="font-mono text-amber-300 font-medium">0m buffer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pomodoro Chronological Schedule Bar -->
+            <div class="aero-card p-5 space-y-4">
+                <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-pink-400"></i> Chronological Session Bar</h3>
+                        <p class="text-xs text-slate-400">Continuous breakdown of every Pomodoro block from start time to bedtime.</p>
+                    </div>
+                    <span class="pill-badge badge-yellow"><i class="fa-solid fa-bolt text-[10px]"></i> Visual Timeline</span>
+                </div>
+                <div class="space-y-2">
+                    <div id="pomoTimelineContainer" class="w-full h-10 bg-black/60 rounded-xl border border-white/10 flex overflow-hidden p-1 gap-0.5 relative"></div>
+                    <div class="flex justify-between text-[11px] font-mono text-slate-400 px-1">
+                        <span id="pomoTimelineStartLabel">--:--</span>
+                        <span id="pomoTimelineMidLabel" class="hidden sm:inline-block">Midpoint</span>
+                        <span id="pomoTimelineEndLabel" class="text-pink-300 font-bold">--:-- Bedtime</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step-by-Step Pomodoro Cards -->
+            <div class="aero-card p-5 space-y-4">
+                <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
+                    <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-emerald-400"></i> Step-by-Step Session Plan</h3>
+                    <span id="pomoTotalBlockCountBadge" class="pill-badge badge-blue">0 Blocks</span>
+                </div>
+                <div id="pomoBlocksList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Shared Edit Modal -->
+    <div id="editModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md hidden">
+        <div class="aero-card max-w-md w-full p-6 mx-4 space-y-4 shadow-2xl relative border border-white/20">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 id="editModalTitle" class="font-bold text-base text-purple-200 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-pink-400"></i> Edit Item
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white text-lg font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <input type="hidden" id="editModalItemId">
+            <input type="hidden" id="editModalItemType">
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-300">Title</label>
+                    <input type="text" id="editModalTitleInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm">
+                </div>
+
+                <div id="fixedEventFields" class="grid grid-cols-2 gap-3 hidden">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-300">Start Time</label>
+                        <input type="time" id="editModalStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-amber-200">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-300">End Time</label>
+                        <input type="time" id="editModalEndTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-amber-200">
+                    </div>
+                </div>
+
+                <div id="taskFields" class="space-y-3 hidden">
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-300">Length Rating (Proportional Mode)</label>
+                        <select id="editModalRatingSelect" class="aero-input w-full px-3 py-2 rounded-lg text-xs font-medium">
+                            <option value="1">1 - Short (1x Weight)</option>
+                            <option value="2">2 - Medium (2x Weight)</option>
+                            <option value="3">3 - Long (3x Weight)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2 pt-3 border-t border-white/10">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock text-teal-300"></i> Fixed Time Range</label>
+                            <button type="button" onclick="clearTaskFixedTimes()" class="text-[11px] text-teal-400 hover:text-teal-200 underline font-medium">Reset to Auto</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[11px] text-slate-400 font-medium">Start Time</label>
+                                <input type="time" id="editModalTaskStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[11px] text-slate-400 font-medium">End Time</label>
+                                <input type="time" id="editModalTaskEndTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
+                            </div>
+                        </div>
+                        <div id="taskDurationPreview" class="text-xs font-mono text-slate-400 bg-black/40 border border-white/10 rounded-lg p-2 text-center transition">
+                            Duration: Auto (Proportional based on weight)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
+                <button onclick="closeEditModal()" class="aero-btn-secondary px-4 py-2 rounded-lg text-xs font-semibold text-slate-300">Cancel</button>
+                <button onclick="saveEditModal()" class="aero-btn px-4 py-2 rounded-lg text-xs font-bold text-white">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-white/10 bg-black/40 py-4 text-center text-xs text-slate-500">
+        Dark Frutiger Aero Productivity Suite &bull; Integrated Task Allocator & Pomodoro Bedtime Engine
+    </footer>
+
+    <!-- Combined Application Logic JavaScript -->
+    <script>
+        // Tab Navigation
+        function switchTab(tabName) {
+            const taskTab = document.getElementById('taskAllocatorTab');
+            const pomoTab = document.getElementById('pomodoroPlannerTab');
+            const tabTaskBtn = document.getElementById('tabTaskBtn');
+            const tabPomoBtn = document.getElementById('tabPomoBtn');
+
+            if (tabName === 'tasks') {
+                taskTab.classList.remove('hidden');
+                pomoTab.classList.add('hidden');
+                tabTaskBtn.className = "aero-btn-active text-xs font-semibold px-3.5 py-1.5 rounded-lg text-white transition flex items-center gap-1.5";
+                tabPomoBtn.className = "aero-btn-secondary text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-300 transition flex items-center gap-1.5 ml-1";
+                calculateAndRender();
+            } else {
+                taskTab.classList.add('hidden');
+                pomoTab.classList.remove('hidden');
+                tabPomoBtn.className = "aero-btn-active text-xs font-semibold px-3.5 py-1.5 rounded-lg text-white transition flex items-center gap-1.5 ml-1";
+                tabTaskBtn.className = "aero-btn-secondary text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-300 transition flex items-center gap-1.5";
+                calculatePomodoroSchedule();
+            }
+        }
+
+        // Shared Bedtime Sync
+        const bedtimeInput = document.getElementById('bedtimeInput');
+        const pomoBedTimeInput = document.getElementById('pomoBedTimeInput');
+
+        bedtimeInput.addEventListener('change', () => {
+            pomoBedTimeInput.value = bedtimeInput.value;
+            calculateAndRender();
+        });
+        pomoBedTimeInput.addEventListener('change', () => {
+            bedtimeInput.value = pomoBedTimeInput.value;
+            calculatePomodoroSchedule();
+        });
+
+        // Task Allocator DOM Elements
+        const totalDurationInput = document.getElementById('totalDurationInput');
+        const taskTitleInput = document.getElementById('taskTitleInput');
+        const taskRatingSelect = document.getElementById('taskRatingSelect');
+        const startTimeInput = document.getElementById('startTimeInput');
+        const autoStartToggle = document.getElementById('autoStartToggle');
+        
+        const eventTitleInput = document.getElementById('eventTitleInput');
+        const eventStartTimeInput = document.getElementById('eventStartTimeInput');
+        const eventEndTimeInput = document.getElementById('eventEndTimeInput');
+        const addEventBtn = document.getElementById('addEventBtn');
+        const fixedEventsContainer = document.getElementById('fixedEventsContainer');
+        const calculatedWorkTimeText = document.getElementById('calculatedWorkTimeText');
+        const applyWorkTimeBtn = document.getElementById('applyWorkTimeBtn');
+
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const loadSampleBtn = document.getElementById('loadSampleBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        const copyListBtn = document.getElementById('copyListBtn');
+        const exportTxtBtn = document.getElementById('exportTxtBtn');
+
+        const sumDisplay = document.getElementById('sumDisplay');
+        const matchStatusBadge = document.getElementById('matchStatusBadge');
+        const calculationSummarySubtext = document.getElementById('calculationSummarySubtext');
+
+        const metricTaskCount = document.getElementById('metricTaskCount');
+        const metricTotalWeight = document.getElementById('metricTotalWeight');
+        const metricBaseUnit = document.getElementById('metricBaseUnit');
+        const metricDelta = document.getElementById('metricDelta');
+
+        const stackedAllocationBar = document.getElementById('stackedAllocationBar');
+        const completionProgressText = document.getElementById('completionProgressText');
+        const masterTimelineContainer = document.getElementById('masterTimelineContainer');
+        const activeCountBadge = document.getElementById('activeCountBadge');
+
+        // Modal Elements
+        const editModal = document.getElementById('editModal');
+        const editModalTitle = document.getElementById('editModalTitle');
+        const editModalItemId = document.getElementById('editModalItemId');
+        const editModalItemType = document.getElementById('editModalItemType');
+        const editModalTitleInput = document.getElementById('editModalTitleInput');
+        const fixedEventFields = document.getElementById('fixedEventFields');
+        const editModalStartTimeInput = document.getElementById('editModalStartTimeInput');
+        const editModalEndTimeInput = document.getElementById('editModalEndTimeInput');
+        const taskFields = document.getElementById('taskFields');
+        const editModalRatingSelect = document.getElementById('editModalRatingSelect');
+        const editModalTaskStartTimeInput = document.getElementById('editModalTaskStartTimeInput');
+        const editModalTaskEndTimeInput = document.getElementById('editModalTaskEndTimeInput');
+        const taskDurationPreview = document.getElementById('taskDurationPreview');
+
+        // Pomodoro DOM Elements
+        const workDurationInput = document.getElementById('workDuration');
+        const shortBreakDurationInput = document.getElementById('shortBreakDuration');
+        const longBreakDurationInput = document.getElementById('longBreakDuration');
+        const sessionsPerCycleInput = document.getElementById('sessionsPerCycle');
+        const customStartTimeInput = document.getElementById('customStartTimeInput');
+        const customStartTimeWrapper = document.getElementById('customStartTimeWrapper');
+
+        const modeLiveBtn = document.getElementById('modeLiveBtn');
+        const modeCustomBtn = document.getElementById('modeCustomBtn');
+        const timeSyncStatus = document.getElementById('timeSyncStatus');
+        const liveClock = document.getElementById('liveClock');
+
+        const bedtimeStatusTitle = document.getElementById('bedtimeStatusTitle');
+        const bedtimeStatusSubtext = document.getElementById('bedtimeStatusSubtext');
+        const effectiveStartTimeTag = document.getElementById('effectiveStartTimeTag');
+
+        const metricTotalTime = document.getElementById('metricTotalTime');
+        const metricWorkSessions = document.getElementById('metricWorkSessions');
+        const metricFocusTime = document.getElementById('metricFocusTime');
+        const metricBreakTime = document.getElementById('metricBreakTime');
+
+        const ratioFocusBar = document.getElementById('ratioFocusBar');
+        const ratioBreakBar = document.getElementById('ratioBreakBar');
+        const ratioBufferBar = document.getElementById('ratioBufferBar');
+        const timeUtilizationRatio = document.getElementById('timeUtilizationRatio');
+        const bufferTimeText = document.getElementById('bufferTimeText');
+
+        const pomoTimelineContainer = document.getElementById('pomoTimelineContainer');
+        const pomoTimelineStartLabel = document.getElementById('pomoTimelineStartLabel');
+        const pomoTimelineMidLabel = document.getElementById('pomoTimelineMidLabel');
+        const pomoTimelineEndLabel = document.getElementById('pomoTimelineEndLabel');
+
+        const pomoBlocksList = document.getElementById('pomoBlocksList');
+        const pomoTotalBlockCountBadge = document.getElementById('pomoTotalBlockCountBadge');
+        const recalculatePomoBtn = document.getElementById('recalculatePomoBtn');
+
+        // Sample Data
+        const sampleTasks = [
+            { id: 1, title: 'lang', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 2, title: 'nhs', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 3, title: 'jazz', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 4, title: 'knowledge check', rating: 1, completed: false, fixedDuration: 15, fixedStartTime: "17:15", fixedEndTime: "17:30" },
+            { id: 5, title: 'titration', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 6, title: 'lewis', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 7, title: 'annotations + space', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 8, title: 'wk5 warmups', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 9, title: 'secrets of the CC', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 10, title: 'discount', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 11, title: 'emerald solo (?)', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 12, title: 'identifying principles', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 13, title: 'brutus', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 14, title: 'wk4 warmups', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null }
+        ];
+
+        const sampleEvents = [
+            { id: 101, title: 'Dinner & Break', startTime: '18:30', endTime: '19:15', isFixed: true },
+            { id: 102, title: 'Study Group Call', startTime: '20:15', endTime: '20:45', isFixed: true }
+        ];
+
+        // Shared State
+        let tasks = [...sampleTasks.map(t => ({ ...t }))];
+        let fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
+        let draggedTaskId = null;
+        let isLivePomoMode = true;
+
+        const colorPalette = [
+            'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-cyan-500',
+            'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-blue-500',
+            'bg-teal-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-sky-500'
+        ];
+
+        function getCurrentTimeStr() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            return `${h}:${m}`;
+        }
+
+        function formatTime12H(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function formatTimeShort(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function syncAutoStartTime() {
+            if (autoStartToggle.checked) {
+                startTimeInput.value = getCurrentTimeStr();
+                startTimeInput.disabled = true;
+                startTimeInput.classList.add('opacity-60');
+            } else {
+                startTimeInput.disabled = false;
+                startTimeInput.classList.remove('opacity-60');
+            }
+        }
+
+        // Live Clock Tick
+        setInterval(() => {
+            const now = new Date();
+            liveClock.textContent = formatTime12H(now);
+
+            if (autoStartToggle.checked) {
+                const nowStr = getCurrentTimeStr();
+                if (startTimeInput.value !== nowStr) {
+                    startTimeInput.value = nowStr;
+                    calculateAndRender();
+                }
+            }
+            if (isLivePomoMode) {
+                calculatePomodoroSchedule();
+            }
+        }, 1000);
+
+        function getSanitizedInput(inputElement, defaultValue = 0) {
+            if (!inputElement || inputElement.value === undefined || inputElement.value === null) return defaultValue;
+            const cleanVal = String(inputElement.value).trim();
+            if (cleanVal === '') return defaultValue;
+            const parsed = parseInt(cleanVal, 10);
+            return isNaN(parsed) ? defaultValue : parsed;
+        }
+
+        function setQuickDuration(val) {
+            totalDurationInput.value = val;
+            calculateAndRender();
+        }
+
+        function calculateDurationFromTimes(startStr, endStr) {
+            if (!startStr || !endStr) return 0;
+            const [sh, sm] = startStr.split(':').map(Number);
+            const [eh, em] = endStr.split(':').map(Number);
+            if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return 0;
+            let startMins = sh * 60 + sm;
+            let endMins = eh * 60 + em;
+            if (endMins <= startMins) endMins += 24 * 60;
+            return endMins - startMins;
+        }
+
+        function initDefaults() {
+            syncAutoStartTime();
+            const now = new Date();
+            const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
+            const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
+
+            eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
+            eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
+            customStartTimeInput.value = getCurrentTimeStr();
+
+            updateFixedEventsUI();
+            calculateAndRender();
+            calculatePomodoroSchedule();
+        }
+
+        autoStartToggle.addEventListener('change', () => {
+            syncAutoStartTime();
+            calculateAndRender();
+        });
+
+        addEventBtn.addEventListener('click', () => {
+            const title = eventTitleInput.value.trim() || 'Fixed Event';
+            const startVal = eventStartTimeInput.value;
+            const endVal = eventEndTimeInput.value;
+
+            if (!startVal || !endVal) return;
+            const duration = calculateDurationFromTimes(startVal, endVal);
+            if (duration <= 0) {
+                alert("End time must be after start time.");
+                return;
+            }
+
+            fixedEvents.push({ id: Date.now(), title, startTime: startVal, endTime: endVal, duration, isFixed: true });
+            eventTitleInput.value = '';
+            updateFixedEventsUI();
+            calculateAndRender();
+        });
+
+        function updateFixedEventsUI() {
+            fixedEventsContainer.innerHTML = '';
+            if (fixedEvents.length === 0) {
+                fixedEventsContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2">No fixed schedule blocks added.</div>`;
+            } else {
+                fixedEvents.forEach(evt => {
+                    const dur = evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime);
+                    const row = document.createElement('div');
+                    row.className = "bg-black/40 border border-white/10 rounded-lg p-2 flex items-center justify-between text-xs";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <span class="pill-badge badge-amber text-[10px] shrink-0"><i class="fa-solid fa-lock text-[9px] text-white"></i> Fixed</span>
+                            <span class="font-semibold text-amber-200 truncate">${escapeHtml(evt.title)}</span>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="font-mono text-slate-300 flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-amber-300"></i> ${evt.startTime} - ${evt.endTime} (${dur}m)
+                            </span>
+                            <button onclick="openEditModal(${evt.id}, 'FIXED')" class="text-slate-400 hover:text-purple-300 transition" title="Edit Event Times"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="removeFixedEvent(${evt.id})" class="text-slate-500 hover:text-rose-400 transition ml-1" title="Delete"><i class="fa-solid fa-xmark text-sm text-slate-400 hover:text-rose-400"></i></button>
+                        </div>
+                    `;
+                    fixedEventsContainer.appendChild(row);
+                });
+            }
+            calculateAvailableWorkWindow();
+        }
+
+        window.removeFixedEvent = function(id) {
+            fixedEvents = fixedEvents.filter(e => e.id !== id);
+            updateFixedEventsUI();
+            calculateAndRender();
+        };
+
+        function calculateAvailableWorkWindow() {
+            if (!startTimeInput.value || !bedtimeInput.value) return 0;
+            const [startH, startM] = startTimeInput.value.split(':').map(Number);
+            const [bedH, bedM] = bedtimeInput.value.split(':').map(Number);
+
+            let startMs = (startH * 60 + startM) * 60 * 1000;
+            let bedMs = (bedH * 60 + bedM) * 60 * 1000;
+            if (bedMs <= startMs) bedMs += 24 * 60 * 60 * 1000;
+
+            let totalSpanMins = Math.round((bedMs - startMs) / (60 * 1000));
+            let fixedMins = fixedEvents.reduce((acc, e) => acc + (e.duration || calculateDurationFromTimes(e.startTime, e.endTime)), 0);
+            let netWorkMins = Math.max(0, totalSpanMins - fixedMins);
+
+            const hours = Math.floor(netWorkMins / 60);
+            const mins = netWorkMins % 60;
+            calculatedWorkTimeText.textContent = `${hours}h ${mins}m available focus time (excl. ${fixedMins}m fixed blocks)`;
+            return netWorkMins;
+        }
+
+        applyWorkTimeBtn.addEventListener('click', () => {
+            const avail = calculateAvailableWorkWindow();
+            if (avail > 0) {
+                totalDurationInput.value = avail;
+                calculateAndRender();
+            }
+        });
+
+        addTaskBtn.addEventListener('click', () => {
+            const title = taskTitleInput.value.trim();
+            const rating = getSanitizedInput(taskRatingSelect, 2);
+            if (!title) return;
+
+            tasks.push({
+                id: Date.now(),
+                title: title,
+                rating: Math.max(1, Math.min(3, rating)),
+                completed: false,
+                fixedDuration: null,
+                fixedStartTime: null,
+                fixedEndTime: null
+            });
+            taskTitleInput.value = '';
+            calculateAndRender();
+        });
+
+        taskTitleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTaskBtn.click();
+        });
+
+        // Modal Management
+        window.openEditModal = function(id, type) {
+            editModalItemId.value = id;
+            editModalItemType.value = type;
+
+            if (type === 'FIXED') {
+                const evt = fixedEvents.find(e => e.id === id);
+                if (!evt) return;
+                editModalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-400"></i> Edit Fixed Event`;
+                editModalTitleInput.value = evt.title;
+                editModalStartTimeInput.value = evt.startTime;
+                editModalEndTimeInput.value = evt.endTime;
+                fixedEventFields.classList.remove('hidden');
+                taskFields.classList.add('hidden');
+            } else {
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                editModalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-pink-400"></i> Edit Task Item`;
+                editModalTitleInput.value = task.title;
+                editModalRatingSelect.value = task.rating || 2;
+                editModalTaskStartTimeInput.value = task.fixedStartTime || '';
+                editModalTaskEndTimeInput.value = task.fixedEndTime || '';
+                updateTaskDurationPreview();
+                fixedEventFields.classList.add('hidden');
+                taskFields.classList.remove('hidden');
+            }
+            editModal.classList.remove('hidden');
+        };
+
+        window.closeEditModal = function() {
+            editModal.classList.add('hidden');
+        };
+
+        function updateTaskDurationPreview() {
+            const startVal = editModalTaskStartTimeInput.value;
+            const endVal = editModalTaskEndTimeInput.value;
+            if (startVal && endVal) {
+                const dur = calculateDurationFromTimes(startVal, endVal);
+                if (dur > 0) {
+                    taskDurationPreview.textContent = `Calculated Fixed Duration: ${dur} mins (${startVal} - ${endVal})`;
+                    taskDurationPreview.className = "text-xs font-mono text-teal-300 bg-teal-950/60 border border-teal-500/40 rounded-lg p-2 text-center font-bold";
+                } else {
+                    taskDurationPreview.textContent = "Invalid range: End time must be after start time";
+                    taskDurationPreview.className = "text-xs font-mono text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-lg p-2 text-center font-bold";
+                }
+            } else {
+                taskDurationPreview.textContent = "Duration: Auto (Proportional based on weight)";
+                taskDurationPreview.className = "text-xs font-mono text-slate-400 bg-black/40 border border-white/10 rounded-lg p-2 text-center";
+            }
+        }
+
+        editModalTaskStartTimeInput.addEventListener('input', updateTaskDurationPreview);
+        editModalTaskEndTimeInput.addEventListener('input', updateTaskDurationPreview);
+
+        window.clearTaskFixedTimes = function() {
+            editModalTaskStartTimeInput.value = '';
+            editModalTaskEndTimeInput.value = '';
+            updateTaskDurationPreview();
+        };
+
+        window.saveEditModal = function() {
+            const id = parseInt(editModalItemId.value, 10);
+            const type = editModalItemType.value;
+            const newTitle = editModalTitleInput.value.trim();
+            if (!newTitle) return;
+
+            if (type === 'FIXED') {
+                const evt = fixedEvents.find(e => e.id === id);
+                if (evt) {
+                    const dur = calculateDurationFromTimes(editModalStartTimeInput.value, editModalEndTimeInput.value);
+                    if (dur <= 0) return alert('End time must be after start time.');
+                    evt.title = newTitle;
+                    evt.startTime = editModalStartTimeInput.value;
+                    evt.endTime = editModalEndTimeInput.value;
+                    evt.duration = dur;
+                    updateFixedEventsUI();
+                }
+            } else {
+                const task = tasks.find(t => t.id === id);
+                if (task) {
+                    task.title = newTitle;
+                    task.rating = parseInt(editModalRatingSelect.value, 10);
+                    const startVal = editModalTaskStartTimeInput.value;
+                    const endVal = editModalTaskEndTimeInput.value;
+
+                    if (startVal && endVal) {
+                        const dur = calculateDurationFromTimes(startVal, endVal);
+                        if (dur <= 0) return alert('End time must be after start time.');
+                        task.fixedDuration = dur;
+                        task.fixedStartTime = startVal;
+                        task.fixedEndTime = endVal;
+                    } else {
+                        task.fixedDuration = null;
+                        task.fixedStartTime = null;
+                        task.fixedEndTime = null;
+                    }
+                }
+            }
+            closeEditModal();
+            calculateAndRender();
+        };
+
+        // Allocation Engine
+        function allocateTaskTimes() {
+            const targetTotal = getSanitizedInput(totalDurationInput, 0);
+            if (tasks.length === 0 || targetTotal <= 0) {
+                return { allocatedTasks: [], totalAllocated: 0, targetTotal, totalWeight: 0, unroundedBaseUnit: 0 };
+            }
+
+            let fixedSum = 0;
+            const dynamicTasks = [];
+            tasks.forEach(t => {
+                if (t.fixedDuration !== null && t.fixedDuration > 0) fixedSum += t.fixedDuration;
+                else dynamicTasks.push(t);
+            });
+
+            const remainingTotal = Math.max(0, targetTotal - fixedSum);
+            const totalWeight = dynamicTasks.reduce((sum, t) => sum + (t.rating || 1), 0);
+            const unroundedBaseUnit = totalWeight > 0 ? remainingTotal / totalWeight : 0;
+
+            let dynamicAllocated = dynamicTasks.map(t => {
+                const weight = t.rating || 1;
+                const exactRaw = weight * unroundedBaseUnit;
+                const roundedTo5 = Math.round(exactRaw / 5) * 5;
+                const minVal = Math.max(5, roundedTo5);
+                return { ...t, exactRaw, allocated: minVal, residual: exactRaw - minVal };
+            });
+
+            if (dynamicTasks.length > 0) {
+                let currentDynamicSum = dynamicAllocated.reduce((sum, t) => sum + t.allocated, 0);
+                let diff = remainingTotal - currentDynamicSum;
+                let iterations = 0;
+
+                while (diff !== 0 && iterations < 500) {
+                    iterations++;
+                    if (diff > 0) {
+                        dynamicAllocated.sort((a, b) => b.residual - a.residual);
+                        dynamicAllocated[0].allocated += 5;
+                        dynamicAllocated[0].residual -= 5;
+                        diff -= 5;
+                    } else {
+                        dynamicAllocated.sort((a, b) => a.residual - b.residual);
+                        let targetItem = dynamicAllocated.find(i => i.allocated > 5) || dynamicAllocated[0];
+                        targetItem.allocated -= 5;
+                        targetItem.residual += 5;
+                        diff += 5;
+                    }
+                }
+            }
+
+            const dynamicMap = new Map(dynamicAllocated.map(t => [t.id, t]));
+            const finalAllocatedTasks = tasks.map(t => {
+                if (t.fixedDuration !== null && t.fixedDuration > 0) {
+                    return { ...t, exactRaw: t.fixedDuration, allocated: t.fixedDuration, isTaskFixed: true };
+                } else {
+                    return dynamicMap.get(t.id) || { ...t, exactRaw: 0, allocated: 0 };
+                }
+            });
+
+            return {
+                allocatedTasks: finalAllocatedTasks,
+                totalAllocated: finalAllocatedTasks.reduce((sum, t) => sum + t.allocated, 0),
+                targetTotal,
+                totalWeight,
+                unroundedBaseUnit
+            };
+        }
+
+        function calculateAndRender() {
+            calculateAvailableWorkWindow();
+            const { allocatedTasks, totalAllocated, targetTotal, totalWeight, unroundedBaseUnit } = allocateTaskTimes();
+
+            sumDisplay.textContent = `${totalAllocated} / ${targetTotal} mins`;
+            
+            if (targetTotal <= 0) {
+                matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-200"></i> INVALID TIME`;
+                matchStatusBadge.className = "pill-badge badge-red";
+            } else if (allocatedTasks.length === 0) {
+                matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-info text-amber-950"></i> NO TASKS`;
+                matchStatusBadge.className = "pill-badge badge-yellow";
+            } else if (totalAllocated === targetTotal) {
+                matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-950"></i> EXACT MATCH`;
+                matchStatusBadge.className = "pill-badge badge-green";
+            } else {
+                matchStatusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-950"></i> OVERFLOW`;
+                matchStatusBadge.className = "pill-badge badge-yellow";
+            }
+
+            metricTaskCount.textContent = allocatedTasks.length;
+            metricTotalWeight.textContent = `${totalWeight}x`;
+            metricBaseUnit.textContent = `${unroundedBaseUnit.toFixed(1)}m`;
+
+            const unadjustedSum = allocatedTasks.reduce((sum, t) => sum + (t.isTaskFixed ? t.allocated : Math.round(t.exactRaw / 5) * 5), 0);
+            const delta = totalAllocated - unadjustedSum;
+            metricDelta.textContent = `${delta >= 0 ? '+' : ''}${delta}m`;
+
+            renderStackedBar(allocatedTasks, targetTotal);
+            renderMasterTimeline(allocatedTasks);
+        }
+
+        function renderStackedBar(allocatedTasks, targetTotal) {
+            stackedAllocationBar.innerHTML = '';
+            if (allocatedTasks.length === 0 || targetTotal <= 0) return;
+
+            allocatedTasks.forEach((task, idx) => {
+                const pct = Math.max(0, (task.allocated / targetTotal) * 100);
+                const seg = document.createElement('div');
+                seg.className = `h-full ${colorPalette[idx % colorPalette.length]} transition-all cursor-pointer hover:brightness-125`;
+                seg.style.width = `${pct}%`;
+                seg.title = `${task.title}: ${task.allocated} mins (${pct.toFixed(1)}%)`;
+                stackedAllocationBar.appendChild(seg);
+            });
+
+            completionProgressText.textContent = `${tasks.filter(t => t.completed).length} / ${tasks.length} Completed`;
+        }
+
+        function renderMasterTimeline(allocatedTasks) {
+            masterTimelineContainer.innerHTML = '';
+            const totalItemsCount = allocatedTasks.length + fixedEvents.length;
+            activeCountBadge.textContent = `${totalItemsCount} Schedule Items`;
+
+            if (totalItemsCount === 0) {
+                masterTimelineContainer.innerHTML = `<div class="py-10 text-center text-slate-500 font-medium"><i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-purple-300 block"></i>No schedule items. Add items above to build timeline.</div>`;
+                return;
+            }
+
+            let startBase = new Date();
+            if (startTimeInput.value) {
+                const [sh, sm] = startTimeInput.value.split(':').map(Number);
+                if (!isNaN(sh) && !isNaN(sm)) startBase.setHours(sh, sm, 0, 0);
+            }
+
+            let currentCursor = new Date(startBase.getTime());
+            let taskQueue = [...allocatedTasks];
+
+            let fixedQueue = fixedEvents.map(evt => {
+                const [eh, em] = evt.startTime.split(':').map(Number);
+                let evtDate = new Date(startBase.getTime());
+                evtDate.setHours(eh, em, 0, 0);
+                if (evtDate < startBase) evtDate.setDate(evtDate.getDate() + 1);
+                return { ...evt, duration: evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime), eventDate: evtDate };
+            }).sort((a, b) => a.eventDate - b.eventDate);
+
+            let masterTimelineItems = [];
+
+            while (taskQueue.length > 0 || fixedQueue.length > 0) {
+                if (fixedQueue.length > 0 && fixedQueue[0].eventDate <= currentCursor) {
+                    let evt = fixedQueue.shift();
+                    let evtEnd = new Date(evt.eventDate.getTime() + evt.duration * 60 * 1000);
+                    masterTimelineItems.push({
+                        type: 'FIXED', id: evt.id, title: evt.title, duration: evt.duration,
+                        startTimeStr: formatTimeShort(evt.eventDate), endTimeStr: formatTimeShort(evtEnd)
+                    });
+                    currentCursor = evtEnd;
+                } else if (taskQueue.length > 0) {
+                    let task = taskQueue.shift();
+                    let taskEnd = new Date(currentCursor.getTime() + task.allocated * 60 * 1000);
+
+                    if (fixedQueue.length > 0 && fixedQueue[0].eventDate < taskEnd) {
+                        let nextFixed = fixedQueue[0];
+                        let minsBeforeFixed = Math.round((nextFixed.eventDate - currentCursor) / (60 * 1000));
+                        if (minsBeforeFixed >= 5) {
+                            masterTimelineItems.push({ type: 'TASK', ...task, allocated: minsBeforeFixed, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(nextFixed.eventDate) });
+                            currentCursor = nextFixed.eventDate;
+                        }
+                    } else {
+                        masterTimelineItems.push({ type: 'TASK', ...task, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(taskEnd) });
+                        currentCursor = taskEnd;
+                    }
+                } else if (fixedQueue.length > 0) {
+                    let evt = fixedQueue.shift();
+                    currentCursor = new Date(evt.eventDate.getTime());
+                    let evtEnd = new Date(currentCursor.getTime() + evt.duration * 60 * 1000);
+                    masterTimelineItems.push({
+                        type: 'FIXED', id: evt.id, title: evt.title, duration: evt.duration,
+                        startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(evtEnd)
+                    });
+                    currentCursor = evtEnd;
+                }
+            }
+
+            masterTimelineItems.forEach((item) => {
+                const card = document.createElement('div');
+
+                if (item.type === 'FIXED') {
+                    card.className = "aero-card p-3.5 border-l-4 border-l-amber-500 bg-amber-950/20 flex items-center justify-between text-xs";
+                    card.innerHTML = `
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <span class="pill-badge badge-amber"><i class="fa-solid fa-lock text-[10px] text-white"></i> Fixed Event</span>
+                            <span class="font-bold text-amber-200 truncate">${escapeHtml(item.title)}</span>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0 font-mono text-slate-300">
+                            <span class="text-amber-300 font-semibold">${item.duration} mins</span>
+                            <span class="text-slate-200 flex items-center gap-1"><i class="fa-regular fa-clock text-amber-300 mr-0.5"></i> ${item.startTimeStr} - ${item.endTimeStr}</span>
+                            <button onclick="openEditModal(${item.id}, 'FIXED')" class="text-slate-400 hover:text-purple-300 transition ml-2"><i class="fa-solid fa-pen text-xs"></i></button>
+                        </div>
+                    `;
+                } else {
+                    let ratingBadge = item.rating === 3 ? 'badge-orange' : (item.rating === 2 ? 'badge-purple' : 'badge-blue');
+                    let ratingLabel = item.rating === 3 ? '3x Long' : (item.rating === 2 ? '2x Medium' : '1x Short');
+                    const isFixedTask = item.fixedDuration !== null && item.fixedDuration > 0;
+
+                    card.className = `draggable-card aero-card p-4 space-y-2.5 relative flex flex-col justify-between transition hover:border-white/30 ${item.completed ? 'opacity-50' : ''}`;
+                    card.setAttribute('draggable', 'true');
+                    card.setAttribute('data-id', item.id);
+
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <div class="cursor-grab text-slate-500 hover:text-purple-300 px-1 py-0.5"><i class="fa-solid fa-grip-vertical"></i></div>
+                                <input type="checkbox" id="check-${item.id}" ${item.completed ? 'checked' : ''} class="w-4 h-4 rounded border-white/20 bg-black/40 text-purple-600 focus:ring-purple-500 cursor-pointer">
+                                <label for="check-${item.id}" class="font-bold text-sm text-slate-100 truncate cursor-pointer hover:text-purple-300 transition">${escapeHtml(item.title)}</label>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="openEditModal(${item.id}, 'TASK')" class="pill-badge ${isFixedTask ? 'badge-teal' : 'aero-btn-secondary text-slate-300'} cursor-pointer">
+                                    <i class="fa-solid ${isFixedTask ? 'fa-clock' : 'fa-wand-magic-sparkles'} text-[10px]"></i>
+                                    ${isFixedTask ? `Fixed (${item.fixedStartTime ? item.fixedStartTime + '-' + item.fixedEndTime : item.fixedDuration + 'm'})` : 'Auto Time'}
+                                </button>
+                                <span class="pill-badge ${ratingBadge}">${ratingLabel}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-baseline justify-between pt-1">
+                            <div class="text-2xl font-black text-pink-300 font-mono tracking-tight flex items-baseline gap-1.5">${item.allocated} <span class="text-xs font-normal text-slate-400">mins</span></div>
+                            <div class="text-right text-xs font-mono text-slate-300"><i class="fa-regular fa-clock text-pink-300"></i> ${item.startTimeStr} - ${item.endTimeStr}</div>
+                        </div>
+
+                        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                            <span>Unrounded: ${(item.exactRaw || item.allocated).toFixed(1)}m</span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openEditModal(${item.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300"><i class="fa-solid fa-pen text-xs text-purple-300"></i> Edit</button>
+                                <button onclick="removeTask(${item.id})" class="hover:text-rose-400 transition text-slate-300 ml-1"><i class="fa-solid fa-trash-can text-xs text-rose-400"></i></button>
+                            </div>
+                        </div>
+                    `;
+
+                    const checkbox = card.querySelector(`#check-${item.id}`);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', (e) => {
+                            const found = tasks.find(t => t.id === item.id);
+                            if (found) {
+                                found.completed = e.target.checked;
+                                calculateAndRender();
+                            }
+                        });
+                    }
+                }
+                masterTimelineContainer.appendChild(card);
+            });
+        }
+
+        window.removeTask = function(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            calculateAndRender();
+        };
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        // Pomodoro Engine Code
+        modeLiveBtn.addEventListener('click', () => {
+            isLivePomoMode = true;
+            modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+            modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+            customStartTimeWrapper.classList.add('hidden');
+            timeSyncStatus.textContent = "● LIVE SYNC";
+            timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
+            calculatePomodoroSchedule();
+        });
+
+        modeCustomBtn.addEventListener('click', () => {
+            isLivePomoMode = false;
+            modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+            modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+            customStartTimeWrapper.classList.remove('hidden');
+            timeSyncStatus.textContent = "○ CUSTOM TIME";
+            timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
+            calculatePomodoroSchedule();
+        });
+
+        function calculatePomodoroSchedule() {
+            const workMin = Math.max(1, parseInt(workDurationInput.value) || 25);
+            const shortBreakMin = Math.max(0, parseInt(shortBreakDurationInput.value) || 5);
+            const longBreakMin = Math.max(0, parseInt(longBreakDurationInput.value) || 15);
+            const sessionsPerCycle = Math.max(1, parseInt(sessionsPerCycleInput.value) || 4);
+
+            let startTime = new Date();
+            if (!isLivePomoMode && customStartTimeInput.value) {
+                const [cHours, cMins] = customStartTimeInput.value.split(':').map(Number);
+                startTime.setHours(cHours, cMins, 0, 0);
+            } else {
+                startTime.setSeconds(0, 0);
+            }
+
+            let bedtime = new Date(startTime);
+            if (pomoBedTimeInput.value) {
+                const [bHours, bMins] = pomoBedTimeInput.value.split(':').map(Number);
+                bedtime.setHours(bHours, bMins, 0, 0);
+                if (bedtime <= startTime) bedtime.setDate(bedtime.getDate() + 1);
+            } else {
+                bedtime.setHours(23, 0, 0, 0);
+                if (bedtime <= startTime) bedtime.setDate(bedtime.getDate() + 1);
+            }
+
+            effectiveStartTimeTag.textContent = `Starts: ${formatTimeShort(startTime)}`;
+
+            const totalAvailableMs = bedtime - startTime;
+            const totalAvailableMinutes = Math.floor(totalAvailableMs / (1000 * 60));
+
+            if (totalAvailableMinutes <= 0) {
+                bedtimeStatusTitle.textContent = "Bedtime Reached!";
+                bedtimeStatusSubtext.textContent = "Target bedtime is set equal to or earlier than your start time.";
+                return;
+            }
+
+            const scheduleBlocks = [];
+            let currentTimeCursor = new Date(startTime);
+            let workSessionCounter = 0;
+            let currentCycleSession = 0;
+
+            let totalFocusMins = 0;
+            let totalBreakMins = 0;
+            let activeBlockAtBedtime = null;
+
+            while (currentTimeCursor < bedtime) {
+                let isWork = false;
+                let blockType = "";
+                let durationMins = 0;
+
+                if (scheduleBlocks.length === 0 || scheduleBlocks[scheduleBlocks.length - 1].isBreak) {
+                    isWork = true;
+                    workSessionCounter++;
+                    currentCycleSession++;
+                    blockType = `Work Session #${workSessionCounter}`;
+                    durationMins = workMin;
+                } else {
+                    isWork = false;
+                    if (currentCycleSession % sessionsPerCycle === 0) {
+                        blockType = "Long Break";
+                        durationMins = longBreakMin;
+                    } else {
+                        blockType = "Short Break";
+                        durationMins = shortBreakMin;
+                    }
+                }
+
+                let blockEnd = new Date(currentTimeCursor.getTime() + durationMins * 60 * 1000);
+
+                if (currentTimeCursor <= bedtime && blockEnd > bedtime) {
+                    activeBlockAtBedtime = {
+                        type: blockType,
+                        isWork: isWork,
+                        minsCompleted: Math.round((bedtime - currentTimeCursor) / (60 * 1000)),
+                        durationMins: durationMins,
+                        endTime: blockEnd
+                    };
+                }
+
+                scheduleBlocks.push({
+                    id: scheduleBlocks.length + 1,
+                    type: blockType,
+                    isWork,
+                    isBreak: !isWork,
+                    duration: durationMins,
+                    startTime: new Date(currentTimeCursor),
+                    endTime: blockEnd
+                });
+
+                if (isWork) totalFocusMins += durationMins;
+                else totalBreakMins += durationMins;
+
+                currentTimeCursor = blockEnd;
+            }
+
+            // Headline Output
+            if (activeBlockAtBedtime) {
+                if (activeBlockAtBedtime.isWork) {
+                    bedtimeStatusTitle.textContent = `Working on ${activeBlockAtBedtime.type}`;
+                    bedtimeStatusSubtext.textContent = `You will be ${activeBlockAtBedtime.minsCompleted} mins into a ${activeBlockAtBedtime.durationMins}-minute focus session when bedtime hits at ${formatTimeShort(bedtime)}.`;
+                } else {
+                    bedtimeStatusTitle.textContent = `Relaxing on a ${activeBlockAtBedtime.type}`;
+                    bedtimeStatusSubtext.textContent = `You will be ${activeBlockAtBedtime.minsCompleted} mins into a break when bedtime arrives at ${formatTimeShort(bedtime)}.`;
+                }
+            } else {
+                bedtimeStatusTitle.textContent = `Bedtime aligned perfectly!`;
+                bedtimeStatusSubtext.textContent = `Your final session concludes right at ${formatTimeShort(bedtime)}.`;
+            }
+
+            const totalUsedMins = totalFocusMins + totalBreakMins;
+            const bufferMins = Math.max(0, totalAvailableMinutes - totalUsedMins);
+
+            const hours = Math.floor(totalAvailableMinutes / 60);
+            const mins = totalAvailableMinutes % 60;
+            metricTotalTime.textContent = `${hours}h ${mins}m`;
+            metricWorkSessions.textContent = workSessionCounter;
+            metricFocusTime.textContent = `${totalFocusMins}m`;
+            metricBreakTime.textContent = `${totalBreakMins}m`;
+
+            const focusPct = Math.min(100, Math.round((totalFocusMins / totalAvailableMinutes) * 100));
+            const breakPct = Math.min(100 - focusPct, Math.round((totalBreakMins / totalAvailableMinutes) * 100));
+            const bufferPct = Math.max(0, 100 - focusPct - breakPct);
+
+            ratioFocusBar.style.width = `${focusPct}%`;
+            ratioBreakBar.style.width = `${breakPct}%`;
+            ratioBufferBar.style.width = `${bufferPct}%`;
+            timeUtilizationRatio.textContent = `${focusPct}% Productive Focus`;
+            bufferTimeText.textContent = `${bufferMins}m buffer`;
+
+            renderPomoTimeline(scheduleBlocks, startTime, bedtime);
+            renderPomoBlocksList(scheduleBlocks, bedtime);
+        }
+
+        function renderPomoTimeline(blocks, startTime, bedtime) {
+            pomoTimelineContainer.innerHTML = '';
+            pomoTimelineStartLabel.textContent = formatTimeShort(startTime);
+            pomoTimelineEndLabel.textContent = `${formatTimeShort(bedtime)} Bedtime`;
+
+            const totalMs = bedtime - startTime;
+            if (totalMs <= 0) return;
+
+            blocks.forEach(block => {
+                const seg = document.createElement('div');
+                const durationMs = block.endTime - block.startTime;
+                const widthPct = Math.max(1, (durationMs / totalMs) * 100);
+
+                seg.className = `h-full rounded transition-all cursor-pointer hover:brightness-125 ${block.isWork ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'}`;
+                seg.style.width = `${widthPct}%`;
+                seg.title = `${block.type} (${block.duration} mins) [${formatTimeShort(block.startTime)} - ${formatTimeShort(block.endTime)}]`;
+                pomoTimelineContainer.appendChild(seg);
+            });
+        }
+
+        function renderPomoBlocksList(blocks, bedtime) {
+            pomoBlocksList.innerHTML = '';
+            pomoTotalBlockCountBadge.textContent = `${blocks.length} Sessions`;
+
+            blocks.forEach(block => {
+                const card = document.createElement('div');
+                const isPastBedtime = block.startTime >= bedtime;
+                const isCurrentBedtimeBlock = block.startTime < bedtime && block.endTime > bedtime;
+
+                card.className = `aero-card p-3 space-y-1.5 text-xs ${isPastBedtime ? 'opacity-40 border-rose-500/30' : (isCurrentBedtimeBlock ? 'border-amber-400 bg-amber-950/20' : '')}`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="pill-badge ${block.isWork ? 'badge-purple' : 'badge-blue'} text-[10px]">
+                            <i class="fa-solid ${block.isWork ? 'fa-briefcase' : 'fa-mug-hot'} text-[9px]"></i> ${block.type}
+                        </span>
+                        <span class="font-mono text-slate-400 text-[11px]">${block.duration}m</span>
+                    </div>
+                    <div class="font-mono font-bold text-slate-200 flex items-center gap-1 pt-1">
+                        <i class="fa-regular fa-clock text-pink-300"></i> ${formatTimeShort(block.startTime)} - ${formatTimeShort(block.endTime)}
+                    </div>
+                `;
+                pomoBlocksList.appendChild(card);
+            });
+        }
+
+        // Global Event Listeners
+        totalDurationInput.addEventListener('input', calculateAndRender);
+        startTimeInput.addEventListener('change', calculateAndRender);
+        calculateBtn.addEventListener('click', calculateAndRender);
+        recalculatePomoBtn.addEventListener('click', calculatePomodoroSchedule);
+
+        loadSampleBtn.addEventListener('click', () => {
+            tasks = [...sampleTasks.map(t => ({ ...t }))];
+            fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
+            totalDurationInput.value = 205;
+            updateFixedEventsUI();
+            calculateAndRender();
+        });
+
+        resetAllBtn.addEventListener('click', () => {
+            tasks = [];
+            fixedEvents = [];
+            updateFixedEventsUI();
+            calculateAndRender();
+        });
+
+        copyListBtn.addEventListener('click', () => {
+            const { allocatedTasks, targetTotal } = allocateTaskTimes();
+            let text = `Master Schedule & Task Allocations (Total Focus Time: ${targetTotal} mins):\n----------------------------------------------------------\n`;
+            fixedEvents.forEach(e => text += `[FIXED EVENT] ${e.title} @ ${e.startTime} - ${e.endTime} (${e.duration} mins)\n`);
+            allocatedTasks.forEach(t => text += `• ${t.title} - ${t.allocated} mins\n`);
+
+            navigator.clipboard.writeText(text);
+            copyListBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i> Copied!`;
+            setTimeout(() => copyListBtn.innerHTML = `<i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule`, 2000);
+        });
+
+        exportTxtBtn.addEventListener('click', () => {
+            const { allocatedTasks, targetTotal } = allocateTaskTimes();
+            let text = `Master Daily Schedule & Task Allocations\nTotal Focus Time: ${targetTotal} minutes\n========================================================\n\n`;
+            allocatedTasks.forEach((t, i) => text += `${i + 1}. [${t.completed ? 'X' : ' '}] ${t.title} - ${t.allocated} mins\n`);
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `master-schedule-${targetTotal}m.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Load Defaults
+        window.addEventListener('DOMContentLoaded', initDefaults);
+    </script>
+</body>
+</html>

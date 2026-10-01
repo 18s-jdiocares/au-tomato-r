@@ -193,15 +193,20 @@
                 </button>
             </div>
 
-            <!-- Actions & Undo -->
+            <!-- Actions & Undo / Redo -->
             <div class="hidden sm:flex items-center space-x-3">
                 <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <strong id="liveClock" class="text-white font-mono">12:00:00 PM</strong>
                 </div>
-                <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Undo action (Ctrl+Z)">
-                    <i class="fa-solid fa-rotate-left text-purple-300"></i> Undo
-                </button>
+                <div class="flex items-center gap-1">
+                    <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Undo action (Ctrl+Z)">
+                        <i class="fa-solid fa-rotate-left text-purple-300"></i> Undo
+                    </button>
+                    <button id="redoBtn" onclick="redo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Redo action (Ctrl+Y)">
+                        <i class="fa-solid fa-rotate-right text-purple-300"></i> Redo
+                    </button>
+                </div>
                 <button id="loadSampleBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
                     <i class="fa-solid fa-list-check text-purple-300"></i> Sample Data
                 </button>
@@ -212,9 +217,9 @@
         </div>
     </header>
 
-    <!-- Toast Notification for Undo -->
+    <!-- Toast Notification for Undo / Redo -->
     <div id="undoToast" class="fixed bottom-5 right-5 z-50 bg-purple-900/90 text-white border border-purple-400/30 px-4 py-2.5 rounded-xl shadow-2xl backdrop-blur-md text-xs font-semibold flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
-        <i class="fa-solid fa-rotate-left text-pink-300"></i>
+        <i id="toastIcon" class="fa-solid fa-rotate-left text-pink-300"></i>
         <span id="toastMessage">Action Undone</span>
     </div>
 
@@ -291,9 +296,6 @@
                             <div class="text-[11px] text-slate-400 font-medium">Calculated Free Work Time Window</div>
                             <div id="calculatedWorkTimeText" class="text-xs text-amber-300 font-semibold mt-0.5">0 hours 0 mins available</div>
                         </div>
-                        <button id="applyWorkTimeBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg text-purple-200 transition flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-right text-pink-400"></i> Sync To Allocator
-                        </button>
                     </div>
                 </div>
 
@@ -717,6 +719,8 @@
 
     <!-- JavaScript Application Logic -->
     <script>
+        const STORAGE_KEY = 'automator_app_state_v1';
+
         // Tab Navigation
         function switchTab(tabName) {
             const taskTab = document.getElementById('taskAllocatorTab');
@@ -737,6 +741,7 @@
                 tabTaskBtn.className = "aero-btn-secondary text-xs font-semibold px-3.5 py-1.5 rounded-lg text-slate-300 transition flex items-center gap-1.5";
                 calculatePomodoroSchedule();
             }
+            saveToLocalStorage();
         }
 
         // Shared Bedtime Sync
@@ -744,14 +749,18 @@
         const pomoBedTimeInput = document.getElementById('pomoBedTimeInput');
 
         bedtimeInput.addEventListener('change', () => {
+            pushState();
             pomoBedTimeInput.value = bedtimeInput.value;
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
         pomoBedTimeInput.addEventListener('change', () => {
+            pushState();
             bedtimeInput.value = pomoBedTimeInput.value;
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
         // DOM Elements - Task Allocator
@@ -767,7 +776,6 @@
         const addEventBtn = document.getElementById('addEventBtn');
         const fixedEventsContainer = document.getElementById('fixedEventsContainer');
         const calculatedWorkTimeText = document.getElementById('calculatedWorkTimeText');
-        const applyWorkTimeBtn = document.getElementById('applyWorkTimeBtn');
 
         const addTaskBtn = document.getElementById('addTaskBtn');
         const calculateBtn = document.getElementById('calculateBtn');
@@ -866,6 +874,7 @@
         let tasks = [...sampleTasks.map(t => ({ ...t }))];
         let fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
         let undoStack = [];
+        let redoStack = [];
         let isLivePomoMode = true;
         let lastCalculatedPomoFocusMins = 0;
         let dragSourceIndex = null;
@@ -876,40 +885,149 @@
             'bg-teal-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-sky-500'
         ];
 
-        // State & Undo Management (Ctrl+Z)
-        function pushState() {
-            if (undoStack.length >= 25) undoStack.shift();
-            undoStack.push(JSON.stringify({
+        // Persistence & LocalStorage Helper
+        function saveToLocalStorage() {
+            const state = {
+                tasks,
+                fixedEvents,
+                totalDuration: totalDurationInput.value,
+                bedtime: bedtimeInput.value,
+                startTime: startTimeInput.value,
+                autoStart: autoStartToggle.checked,
+                workDuration: workDurationInput.value,
+                shortBreakDuration: shortBreakDurationInput.value,
+                longBreakDuration: longBreakDurationInput.value,
+                sessionsPerCycle: sessionsPerCycleInput.value,
+                isLivePomoMode,
+                customStartTime: customStartTimeInput.value,
+                integrateFixedEvents: integrateFixedEventsToggle.checked
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function loadFromLocalStorage() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (!data) return false;
+            try {
+                const state = JSON.parse(data);
+                if (state.tasks) tasks = state.tasks;
+                if (state.fixedEvents) fixedEvents = state.fixedEvents;
+                if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
+                if (state.bedtime !== undefined) {
+                    bedtimeInput.value = state.bedtime;
+                    pomoBedTimeInput.value = state.bedtime;
+                }
+                if (state.startTime !== undefined) startTimeInput.value = state.startTime;
+                if (state.autoStart !== undefined) autoStartToggle.checked = state.autoStart;
+                if (state.workDuration !== undefined) workDurationInput.value = state.workDuration;
+                if (state.shortBreakDuration !== undefined) shortBreakDurationInput.value = state.shortBreakDuration;
+                if (state.longBreakDuration !== undefined) longBreakDurationInput.value = state.longBreakDuration;
+                if (state.sessionsPerCycle !== undefined) sessionsPerCycleInput.value = state.sessionsPerCycle;
+                if (state.isLivePomoMode !== undefined) {
+                    isLivePomoMode = state.isLivePomoMode;
+                    if (isLivePomoMode) {
+                        modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+                        modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                        customStartTimeWrapper.classList.add('hidden');
+                        timeSyncStatus.textContent = "● LIVE SYNC";
+                        timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
+                    } else {
+                        modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+                        modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                        customStartTimeWrapper.classList.remove('hidden');
+                        timeSyncStatus.textContent = "○ CUSTOM TIME";
+                        timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
+                    }
+                }
+                if (state.customStartTime !== undefined) customStartTimeInput.value = state.customStartTime;
+                if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
+                return true;
+            } catch (e) {
+                console.error("Failed to load saved state", e);
+                return false;
+            }
+        }
+
+        function getCurrentStateSnapshot() {
+            return JSON.stringify({
                 tasks: tasks,
                 fixedEvents: fixedEvents,
-                totalDuration: totalDurationInput.value
-            }));
+                totalDuration: totalDurationInput.value,
+                bedtime: bedtimeInput.value,
+                workDuration: workDurationInput.value,
+                shortBreakDuration: shortBreakDurationInput.value,
+                longBreakDuration: longBreakDurationInput.value,
+                sessionsPerCycle: sessionsPerCycleInput.value,
+                integrateFixedEvents: integrateFixedEventsToggle.checked
+            });
+        }
+
+        function restoreStateFromSnapshot(snapshotStr) {
+            const state = JSON.parse(snapshotStr);
+            tasks = state.tasks;
+            fixedEvents = state.fixedEvents;
+            totalDurationInput.value = state.totalDuration;
+            if (state.bedtime) {
+                bedtimeInput.value = state.bedtime;
+                pomoBedTimeInput.value = state.bedtime;
+            }
+            if (state.workDuration) workDurationInput.value = state.workDuration;
+            if (state.shortBreakDuration) shortBreakDurationInput.value = state.shortBreakDuration;
+            if (state.longBreakDuration) longBreakDurationInput.value = state.longBreakDuration;
+            if (state.sessionsPerCycle) sessionsPerCycleInput.value = state.sessionsPerCycle;
+            if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
+
+            updateFixedEventsUI();
+            calculateAndRender();
+            calculatePomodoroSchedule();
+            saveToLocalStorage();
+        }
+
+        // State & Undo/Redo Management (Ctrl+Z / Ctrl+Y)
+        function pushState() {
+            if (undoStack.length >= 25) undoStack.shift();
+            undoStack.push(getCurrentStateSnapshot());
+            redoStack = []; // Clear redo stack on new user action
         }
 
         function undo() {
             if (undoStack.length === 0) return;
-            const previousState = JSON.parse(undoStack.pop());
-            tasks = previousState.tasks;
-            fixedEvents = previousState.fixedEvents;
-            totalDurationInput.value = previousState.totalDuration;
-            
-            updateFixedEventsUI();
-            calculateAndRender();
-            calculatePomodoroSchedule();
-            showUndoToast("Action Undone");
+            redoStack.push(getCurrentStateSnapshot());
+            const previousStateStr = undoStack.pop();
+            restoreStateFromSnapshot(previousStateStr);
+            showUndoToast("Action Undone", "fa-rotate-left");
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+            undoStack.push(getCurrentStateSnapshot());
+            const nextStateStr = redoStack.pop();
+            restoreStateFromSnapshot(nextStateStr);
+            showUndoToast("Action Redone", "fa-rotate-right");
         }
 
         document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-                e.preventDefault();
-                undo();
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key.toLowerCase() === 'z') {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        redo();
+                    } else {
+                        undo();
+                    }
+                } else if (e.key.toLowerCase() === 'y') {
+                    e.preventDefault();
+                    redo();
+                }
             }
         });
 
-        function showUndoToast(msg) {
+        function showUndoToast(msg, iconClass = "fa-rotate-left") {
             const toast = document.getElementById('undoToast');
             document.getElementById('toastMessage').textContent = msg;
+            const toastIcon = document.getElementById('toastIcon');
+            if (toastIcon) toastIcon.className = `fa-solid ${iconClass} text-pink-300`;
             toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
@@ -971,6 +1089,7 @@
             pushState();
             totalDurationInput.value = val;
             calculateAndRender();
+            saveToLocalStorage();
         }
 
         function calculateDurationFromTimes(startStr, endStr) {
@@ -985,14 +1104,27 @@
         }
 
         function initDefaults() {
+            const loaded = loadFromLocalStorage();
             syncAutoStartTime();
-            const now = new Date();
-            const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
-            const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
 
-            eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
-            eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
-            customStartTimeInput.value = getCurrentTimeStr();
+            if (!loaded) {
+                const now = new Date();
+                const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
+                const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
+
+                eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
+                eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
+                customStartTimeInput.value = getCurrentTimeStr();
+            } else {
+                if (!eventStartTimeInput.value || !eventEndTimeInput.value) {
+                    const now = new Date();
+                    const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
+                    const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
+                    eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
+                    eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
+                }
+                if (!customStartTimeInput.value) customStartTimeInput.value = getCurrentTimeStr();
+            }
 
             updateFixedEventsUI();
             calculateAndRender();
@@ -1002,7 +1134,17 @@
         autoStartToggle.addEventListener('change', () => {
             syncAutoStartTime();
             calculateAndRender();
+            saveToLocalStorage();
         });
+
+        // Helper to sort fixed events chronologically
+        function sortFixedEvents() {
+            fixedEvents.sort((a, b) => {
+                const [ah, am] = (a.startTime || '00:00').split(':').map(Number);
+                const [bh, bm] = (b.startTime || '00:00').split(':').map(Number);
+                return (ah * 60 + am) - (bh * 60 + bm);
+            });
+        }
 
         // Fixed Events Logic
         addEventBtn.addEventListener('click', () => {
@@ -1019,13 +1161,16 @@
 
             pushState();
             fixedEvents.push({ id: Date.now(), title, startTime: startVal, endTime: endVal, duration, isFixed: true });
+            sortFixedEvents();
             eventTitleInput.value = '';
             updateFixedEventsUI();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
         function updateFixedEventsUI() {
+            sortFixedEvents();
             fixedEventsContainer.innerHTML = '';
             if (fixedEvents.length === 0) {
                 fixedEventsContainer.innerHTML = `<div class="text-xs text-slate-500 italic py-2">No fixed schedule blocks added.</div>`;
@@ -1059,6 +1204,7 @@
             updateFixedEventsUI();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         };
 
         function calculateAvailableWorkWindow() {
@@ -1080,15 +1226,6 @@
             return netWorkMins;
         }
 
-        applyWorkTimeBtn.addEventListener('click', () => {
-            const avail = calculateAvailableWorkWindow();
-            if (avail > 0) {
-                pushState();
-                totalDurationInput.value = avail;
-                calculateAndRender();
-            }
-        });
-
         // Add Task Logic
         addTaskBtn.addEventListener('click', () => {
             const title = taskTitleInput.value.trim();
@@ -1107,6 +1244,7 @@
             });
             taskTitleInput.value = '';
             calculateAndRender();
+            saveToLocalStorage();
         });
 
         taskTitleInput.addEventListener('keypress', (e) => {
@@ -1243,6 +1381,7 @@
             closeEditModal();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         };
 
         // Sync Pomodoro Calculated Focus Time into Task Allocator
@@ -1251,7 +1390,8 @@
                 pushState();
                 totalDurationInput.value = lastCalculatedPomoFocusMins;
                 calculateAndRender();
-                showUndoToast(`Synced ${lastCalculatedPomoFocusMins}m Focus Time`);
+                saveToLocalStorage();
+                showUndoToast(`Synced ${lastCalculatedPomoFocusMins}m Focus Time`, "fa-stopwatch");
             } else {
                 alert("Please calculate a valid Pomodoro schedule first.");
             }
@@ -1526,6 +1666,7 @@
                         tasks.splice(originalIndex, 0, movedItem);
                         dragSourceIndex = null;
                         calculateAndRender();
+                        saveToLocalStorage();
                     });
 
                     const checkbox = card.querySelector(`#check-${item.id}`);
@@ -1536,6 +1677,7 @@
                             if (found) {
                                 found.completed = e.target.checked;
                                 calculateAndRender();
+                                saveToLocalStorage();
                             }
                         });
                     }
@@ -1548,6 +1690,7 @@
             pushState();
             tasks = tasks.filter(t => t.id !== id);
             calculateAndRender();
+            saveToLocalStorage();
         };
 
         function escapeHtml(str) {
@@ -1558,6 +1701,7 @@
 
         // Pomodoro Engine Logic with Fixed Events Integration
         modeLiveBtn.addEventListener('click', () => {
+            pushState();
             isLivePomoMode = true;
             modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
             modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
@@ -1565,9 +1709,11 @@
             timeSyncStatus.textContent = "● LIVE SYNC";
             timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
         modeCustomBtn.addEventListener('click', () => {
+            pushState();
             isLivePomoMode = false;
             modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
             modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
@@ -1575,9 +1721,14 @@
             timeSyncStatus.textContent = "○ CUSTOM TIME";
             timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
-        integrateFixedEventsToggle.addEventListener('change', calculatePomodoroSchedule);
+        integrateFixedEventsToggle.addEventListener('change', () => {
+            pushState();
+            calculatePomodoroSchedule();
+            saveToLocalStorage();
+        });
 
         function calculatePomodoroSchedule() {
             const workMin = Math.max(1, parseInt(workDurationInput.value) || 25);
@@ -1819,11 +1970,17 @@
             });
         }
 
-        // Event Listeners
-        totalDurationInput.addEventListener('input', calculateAndRender);
-        startTimeInput.addEventListener('change', calculateAndRender);
-        calculateBtn.addEventListener('click', calculateAndRender);
-        recalculatePomoBtn.addEventListener('click', calculatePomodoroSchedule);
+        // Input Event Listeners with Auto-Save
+        totalDurationInput.addEventListener('input', () => { calculateAndRender(); saveToLocalStorage(); });
+        startTimeInput.addEventListener('change', () => { calculateAndRender(); saveToLocalStorage(); });
+        workDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
+        shortBreakDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
+        longBreakDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
+        sessionsPerCycleInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
+        customStartTimeInput.addEventListener('change', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
+
+        calculateBtn.addEventListener('click', () => { calculateAndRender(); saveToLocalStorage(); });
+        recalculatePomoBtn.addEventListener('click', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
 
         loadSampleBtn.addEventListener('click', () => {
             pushState();
@@ -1833,6 +1990,7 @@
             updateFixedEventsUI();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
         resetAllBtn.addEventListener('click', () => {
@@ -1842,6 +2000,7 @@
             updateFixedEventsUI();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
         });
 
         copyListBtn.addEventListener('click', () => {

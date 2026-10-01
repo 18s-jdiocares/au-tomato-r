@@ -291,6 +291,9 @@
                             <div class="text-[11px] text-slate-400 font-medium">Calculated Free Work Time Window</div>
                             <div id="calculatedWorkTimeText" class="text-xs text-amber-300 font-semibold mt-0.5">0 hours 0 mins available</div>
                         </div>
+                        <button id="applyWorkTimeBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg text-purple-200 transition flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-right text-pink-400"></i> Sync To Allocator
+                        </button>
                     </div>
                 </div>
 
@@ -764,6 +767,7 @@
         const addEventBtn = document.getElementById('addEventBtn');
         const fixedEventsContainer = document.getElementById('fixedEventsContainer');
         const calculatedWorkTimeText = document.getElementById('calculatedWorkTimeText');
+        const applyWorkTimeBtn = document.getElementById('applyWorkTimeBtn');
 
         const addTaskBtn = document.getElementById('addTaskBtn');
         const calculateBtn = document.getElementById('calculateBtn');
@@ -1075,6 +1079,15 @@
             calculatedWorkTimeText.textContent = `${hours}h ${mins}m available focus time (excl. ${fixedMins}m fixed blocks)`;
             return netWorkMins;
         }
+
+        applyWorkTimeBtn.addEventListener('click', () => {
+            const avail = calculateAvailableWorkWindow();
+            if (avail > 0) {
+                pushState();
+                totalDurationInput.value = avail;
+                calculateAndRender();
+            }
+        });
 
         // Add Task Logic
         addTaskBtn.addEventListener('click', () => {

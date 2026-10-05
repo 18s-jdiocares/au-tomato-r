@@ -207,10 +207,10 @@
                         <i class="fa-solid fa-rotate-right text-purple-300"></i> Redo
                     </button>
                 </div>
-                <button id="loadSampleBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
+                <button id="loadSampleBtn" onclick="loadSampleData()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
                     <i class="fa-solid fa-list-check text-purple-300"></i> Sample Data
                 </button>
-                <button id="resetAllBtn" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-300 hover:text-rose-200">
+                <button id="resetAllBtn" onclick="resetAllData()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-300 hover:text-rose-200">
                     <i class="fa-solid fa-trash-can text-rose-400"></i> Reset
                 </button>
             </div>
@@ -226,9 +226,7 @@
     <!-- Main Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- ========================================================= -->
-        <!-- TAB 1: TASK ALLOCATOR & MASTER TIMELINE ENGINE           -->
-        <!-- ========================================================= -->
+        <!-- TAB 1: TASK ALLOCATOR & MASTER TIMELINE ENGINE -->
         <div id="taskAllocatorTab" class="space-y-6">
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -307,7 +305,7 @@
                                 <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
                                     <i class="fa-solid fa-sliders text-pink-400"></i> Task Allocator Engine
                                 </h2>
-                                <p class="text-xs text-slate-400 mt-0.5">Distributes time proportionally in multiples of 5.</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Top tasks prioritized for longer duration on equal rating ties.</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button id="syncPomoFocusBtn" onclick="syncPomoFocusToAllocator()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-lg text-pink-300 transition flex items-center gap-1" title="Use calculated Pomodoro focus time as target">
@@ -366,7 +364,7 @@
                         </div>
                     </div>
 
-                    <button id="calculateBtn" class="aero-btn w-full py-3 rounded-xl text-white font-extrabold text-sm tracking-wide flex items-center justify-center gap-2 mt-4 shadow-lg shadow-purple-900/40">
+                    <button id="calculateBtn" onclick="calculateAndRender()" class="aero-btn w-full py-3 rounded-xl text-white font-extrabold text-sm tracking-wide flex items-center justify-center gap-2 mt-4 shadow-lg shadow-purple-900/40">
                         <i class="fa-solid fa-rotate text-xs text-purple-200"></i> Recalculate Schedule & Allocations
                     </button>
                 </div>
@@ -383,7 +381,7 @@
                         <div class="space-y-1">
                             <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Total Target vs Allocated</div>
                             <h2 id="sumDisplay" class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white font-mono">0 / 205 mins</h2>
-                            <p id="calculationSummarySubtext" class="text-xs text-slate-300 pt-1 leading-relaxed">Every task duration is rounded to a multiple of 5 based on weight standard proportional distribution.</p>
+                            <p id="calculationSummarySubtext" class="text-xs text-slate-300 pt-1 leading-relaxed">Top tasks automatically prioritized for rounding additions when length ratings are tied.</p>
                         </div>
                     </div>
 
@@ -416,10 +414,10 @@
                     </div>
                     <div id="stackedAllocationBar" class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5"></div>
                     <div class="flex items-center justify-between pt-1">
-                        <div class="text-[11px] text-slate-400 flex items-center gap-1">Multiples of 5 verified <i class="fa-solid fa-check text-emerald-400 ml-0.5"></i></div>
+                        <div class="text-[11px] text-slate-400 flex items-center gap-1">Top-to-bottom priority tie-breaking active <i class="fa-solid fa-check text-emerald-400 ml-0.5"></i></div>
                         <div class="flex items-center gap-2">
-                            <button id="copyListBtn" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule</button>
-                            <button id="exportTxtBtn" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-download text-pink-300 mr-1"></i> Export TXT</button>
+                            <button id="copyListBtn" onclick="copyScheduleText()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule</button>
+                            <button id="exportTxtBtn" onclick="exportScheduleTxt()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-download text-pink-300 mr-1"></i> Export TXT</button>
                         </div>
                     </div>
                 </div>
@@ -430,7 +428,7 @@
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Master Timeline & Task Schedule</h3>
-                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Fixed events and duration-fixed tasks align dynamically.</p>
+                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Higher tasks get extra minute priority on equal length ratings.</p>
                     </div>
                     <span id="activeCountBadge" class="pill-badge badge-blue">0 Items</span>
                 </div>
@@ -438,9 +436,7 @@
             </div>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- TAB 2: POMODORO BEDTIME PLANNER                           -->
-        <!-- ========================================================= -->
+        <!-- TAB 2: POMODORO BEDTIME PLANNER -->
         <div id="pomodoroPlannerTab" class="space-y-6 hidden">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
@@ -510,8 +506,8 @@
                                     <span id="timeSyncStatus" class="text-[10px] text-emerald-400 font-mono">● LIVE SYNC</span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-white/10">
-                                    <button id="modeLiveBtn" class="py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition"><i class="fa-solid fa-play text-[10px] mr-1"></i> Live Now</button>
-                                    <button id="modeCustomBtn" class="py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition"><i class="fa-solid fa-pen text-[10px] mr-1"></i> Custom</button>
+                                    <button id="modeLiveBtn" onclick="setPomoStartMode(true)" class="py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition"><i class="fa-solid fa-play text-[10px] mr-1"></i> Live Now</button>
+                                    <button id="modeCustomBtn" onclick="setPomoStartMode(false)" class="py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition"><i class="fa-solid fa-pen text-[10px] mr-1"></i> Custom</button>
                                 </div>
                                 <div id="customStartTimeWrapper" class="hidden pt-1">
                                     <label class="text-[11px] font-medium text-slate-400 mb-1 block">Specify Custom Start Time:</label>
@@ -532,7 +528,7 @@
                         </div>
                     </div>
 
-                    <button id="recalculatePomoBtn" class="aero-btn w-full py-2.5 rounded-xl text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
+                    <button id="recalculatePomoBtn" onclick="calculatePomodoroSchedule()" class="aero-btn w-full py-2.5 rounded-xl text-white font-bold text-sm tracking-wide flex items-center justify-center gap-2 mt-2">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate Schedule
                     </button>
                 </div>
@@ -721,6 +717,11 @@
     <script>
         const STORAGE_KEY = 'automator_app_state_v1';
 
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
         // Tab Navigation
         function switchTab(tabName) {
             const taskTab = document.getElementById('taskAllocatorTab');
@@ -763,7 +764,7 @@
             saveToLocalStorage();
         });
 
-        // DOM Elements - Task Allocator
+        // DOM Elements
         const totalDurationInput = document.getElementById('totalDurationInput');
         const taskTitleInput = document.getElementById('taskTitleInput');
         const taskRatingSelect = document.getElementById('taskRatingSelect');
@@ -779,10 +780,6 @@
 
         const addTaskBtn = document.getElementById('addTaskBtn');
         const calculateBtn = document.getElementById('calculateBtn');
-        const loadSampleBtn = document.getElementById('loadSampleBtn');
-        const resetAllBtn = document.getElementById('resetAllBtn');
-        const copyListBtn = document.getElementById('copyListBtn');
-        const exportTxtBtn = document.getElementById('exportTxtBtn');
 
         const sumDisplay = document.getElementById('sumDisplay');
         const matchStatusBadge = document.getElementById('matchStatusBadge');
@@ -849,7 +846,6 @@
 
         const pomoBlocksList = document.getElementById('pomoBlocksList');
         const pomoTotalBlockCountBadge = document.getElementById('pomoTotalBlockCountBadge');
-        const recalculatePomoBtn = document.getElementById('recalculatePomoBtn');
 
         // Sample Data
         const sampleTasks = [
@@ -885,7 +881,7 @@
             'bg-teal-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-sky-500'
         ];
 
-        // Persistence & LocalStorage Helper
+        // LocalStorage Helper
         function saveToLocalStorage() {
             const state = {
                 tasks,
@@ -923,22 +919,7 @@
                 if (state.shortBreakDuration !== undefined) shortBreakDurationInput.value = state.shortBreakDuration;
                 if (state.longBreakDuration !== undefined) longBreakDurationInput.value = state.longBreakDuration;
                 if (state.sessionsPerCycle !== undefined) sessionsPerCycleInput.value = state.sessionsPerCycle;
-                if (state.isLivePomoMode !== undefined) {
-                    isLivePomoMode = state.isLivePomoMode;
-                    if (isLivePomoMode) {
-                        modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
-                        modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
-                        customStartTimeWrapper.classList.add('hidden');
-                        timeSyncStatus.textContent = "● LIVE SYNC";
-                        timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
-                    } else {
-                        modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
-                        modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
-                        customStartTimeWrapper.classList.remove('hidden');
-                        timeSyncStatus.textContent = "○ CUSTOM TIME";
-                        timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
-                    }
-                }
+                if (state.isLivePomoMode !== undefined) setPomoStartMode(state.isLivePomoMode);
                 if (state.customStartTime !== undefined) customStartTimeInput.value = state.customStartTime;
                 if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
                 return true;
@@ -983,11 +964,11 @@
             saveToLocalStorage();
         }
 
-        // State & Undo/Redo Management (Ctrl+Z / Ctrl+Y)
+        // State & Undo/Redo Management
         function pushState() {
             if (undoStack.length >= 25) undoStack.shift();
             undoStack.push(getCurrentStateSnapshot());
-            redoStack = []; // Clear redo stack on new user action
+            redoStack = [];
         }
 
         function undo() {
@@ -1011,11 +992,8 @@
             if (e.ctrlKey || e.metaKey) {
                 if (e.key.toLowerCase() === 'z') {
                     e.preventDefault();
-                    if (e.shiftKey) {
-                        redo();
-                    } else {
-                        undo();
-                    }
+                    if (e.shiftKey) redo();
+                    else undo();
                 } else if (e.key.toLowerCase() === 'y') {
                     e.preventDefault();
                     redo();
@@ -1103,32 +1081,49 @@
             return endMins - startMins;
         }
 
-        function initDefaults() {
-            const loaded = loadFromLocalStorage();
-            syncAutoStartTime();
-
-            if (!loaded) {
-                const now = new Date();
-                const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
-                const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
-
-                eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
-                eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
-                customStartTimeInput.value = getCurrentTimeStr();
+        function setPomoStartMode(isLive) {
+            isLivePomoMode = isLive;
+            if (isLivePomoMode) {
+                modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+                modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                customStartTimeWrapper.classList.add('hidden');
+                timeSyncStatus.textContent = "● LIVE SYNC";
+                timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
             } else {
-                if (!eventStartTimeInput.value || !eventEndTimeInput.value) {
-                    const now = new Date();
-                    const evtStart = new Date(now.getTime() + 60 * 60 * 1000);
-                    const evtEnd = new Date(evtStart.getTime() + 30 * 60 * 1000);
-                    eventStartTimeInput.value = `${String(evtStart.getHours()).padStart(2, '0')}:${String(evtStart.getMinutes()).padStart(2, '0')}`;
-                    eventEndTimeInput.value = `${String(evtEnd.getHours()).padStart(2, '0')}:${String(evtEnd.getMinutes()).padStart(2, '0')}`;
-                }
-                if (!customStartTimeInput.value) customStartTimeInput.value = getCurrentTimeStr();
+                modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
+                modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
+                customStartTimeWrapper.classList.remove('hidden');
+                timeSyncStatus.textContent = "○ CUSTOM TIME";
+                timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
             }
+            calculatePomodoroSchedule();
+            saveToLocalStorage();
+        }
 
+        function loadSampleData() {
+            pushState();
+            tasks = sampleTasks.map(t => ({ ...t }));
+            fixedEvents = sampleEvents.map(e => ({ ...e }));
+            totalDurationInput.value = 205;
             updateFixedEventsUI();
             calculateAndRender();
             calculatePomodoroSchedule();
+            saveToLocalStorage();
+            showUndoToast("Sample Data Loaded", "fa-list-check");
+        }
+
+        function resetAllData() {
+            if (confirm("Are you sure you want to reset all tasks and fixed events?")) {
+                pushState();
+                tasks = [];
+                fixedEvents = [];
+                totalDurationInput.value = 0;
+                updateFixedEventsUI();
+                calculateAndRender();
+                calculatePomodoroSchedule();
+                saveToLocalStorage();
+                showUndoToast("Data Reset", "fa-trash-can");
+            }
         }
 
         autoStartToggle.addEventListener('change', () => {
@@ -1137,7 +1132,7 @@
             saveToLocalStorage();
         });
 
-        // Helper to sort fixed events chronologically
+        // Fixed Events Logic
         function sortFixedEvents() {
             fixedEvents.sort((a, b) => {
                 const [ah, am] = (a.startTime || '00:00').split(':').map(Number);
@@ -1146,7 +1141,6 @@
             });
         }
 
-        // Fixed Events Logic
         addEventBtn.addEventListener('click', () => {
             const title = eventTitleInput.value.trim() || 'Fixed Event';
             const startVal = eventStartTimeInput.value;
@@ -1384,7 +1378,6 @@
             saveToLocalStorage();
         };
 
-        // Sync Pomodoro Calculated Focus Time into Task Allocator
         function syncPomoFocusToAllocator() {
             if (lastCalculatedPomoFocusMins > 0) {
                 pushState();
@@ -1397,7 +1390,12 @@
             }
         }
 
-        // Proportional Allocation Logic
+        /**
+         * Core Task Allocation Engine with Top-to-Bottom Priority Tie-Breaking.
+         * If several tasks have equal length rating / weight:
+         * - When adding +5 min increments (diff > 0): Items higher up (top) get priority.
+         * - When subtracting -5 min increments (diff < 0): Items lower down (bottom) lose time first.
+         */
         function allocateTaskTimes() {
             const targetTotal = getSanitizedInput(totalDurationInput, 0);
             if (tasks.length === 0 || targetTotal <= 0) {
@@ -1406,9 +1404,9 @@
 
             let fixedSum = 0;
             const dynamicTasks = [];
-            tasks.forEach(t => {
+            tasks.forEach((t, idx) => {
                 if (t.fixedDuration !== null && t.fixedDuration > 0) fixedSum += t.fixedDuration;
-                else dynamicTasks.push(t);
+                else dynamicTasks.push({ ...t, originalIndex: idx });
             });
 
             const remainingTotal = Math.max(0, targetTotal - fixedSum);
@@ -1431,12 +1429,16 @@
                 while (diff !== 0 && iterations < 500) {
                     iterations++;
                     if (diff > 0) {
-                        dynamicAllocated.sort((a, b) => b.residual - a.residual);
+                        // Priority 1: Higher residual.
+                        // Priority 2 (Tie breaker): Smaller originalIndex (Top of list gets +5m first).
+                        dynamicAllocated.sort((a, b) => (b.residual - a.residual) || (a.originalIndex - b.originalIndex));
                         dynamicAllocated[0].allocated += 5;
                         dynamicAllocated[0].residual -= 5;
                         diff -= 5;
                     } else {
-                        dynamicAllocated.sort((a, b) => a.residual - b.residual);
+                        // Priority 1: Lower residual.
+                        // Priority 2 (Tie breaker): Larger originalIndex (Bottom of list loses -5m first).
+                        dynamicAllocated.sort((a, b) => (a.residual - b.residual) || (b.originalIndex - a.originalIndex));
                         let targetItem = dynamicAllocated.find(i => i.allocated > 5) || dynamicAllocated[0];
                         targetItem.allocated -= 5;
                         targetItem.residual += 5;
@@ -1444,6 +1446,9 @@
                     }
                 }
             }
+
+            // Restore initial order by original index
+            dynamicAllocated.sort((a, b) => a.originalIndex - b.originalIndex);
 
             const dynamicMap = new Map(dynamicAllocated.map(t => [t.id, t]));
             const finalAllocatedTasks = tasks.map(t => {
@@ -1596,7 +1601,6 @@
                     let ratingBadge = item.rating === 3 ? 'badge-orange' : (item.rating === 2 ? 'badge-purple' : 'badge-blue');
                     let ratingLabel = item.rating === 3 ? '3x Long' : (item.rating === 2 ? '2x Medium' : '1x Short');
                     const isFixedTask = item.fixedDuration !== null && item.fixedDuration > 0;
-
                     const originalIndex = tasks.findIndex(t => t.id === item.id);
 
                     card.className = `draggable-card aero-card p-4 space-y-2.5 relative flex flex-col justify-between transition hover:border-white/30 ${item.completed ? 'opacity-50' : ''}`;
@@ -1628,57 +1632,51 @@
                         <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
                             <span>Unrounded: ${(item.exactRaw || item.allocated).toFixed(1)}m</span>
                             <div class="flex items-center gap-2">
-                                <button onclick="openEditModal(${item.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300"><i class="fa-solid fa-pen text-xs text-purple-300"></i> Edit</button>
-                                <button onclick="removeTask(${item.id})" class="hover:text-rose-400 transition text-slate-300 ml-1"><i class="fa-solid fa-trash-can text-xs text-rose-400"></i></button>
+                                <button onclick="openEditModal(${item.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300" title="Edit Task"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="removeTask(${item.id})" class="hover:text-rose-400 transition text-slate-400" title="Delete Task"><i class="fa-solid fa-trash-can text-xs"></i></button>
                             </div>
                         </div>
                     `;
 
-                    // Drag & Drop Handlers
+                    // Drag & Drop Event Handlers
                     card.addEventListener('dragstart', (e) => {
-                        dragSourceIndex = originalIndex;
+                        dragSourceIndex = parseInt(card.getAttribute('data-index'), 10);
                         card.classList.add('dragging');
                         e.dataTransfer.effectAllowed = 'move';
                     });
-
                     card.addEventListener('dragend', () => {
                         card.classList.remove('dragging');
                         document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     });
-
                     card.addEventListener('dragover', (e) => {
                         e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
                         card.classList.add('drag-over');
                     });
-
                     card.addEventListener('dragleave', () => {
                         card.classList.remove('drag-over');
                     });
-
                     card.addEventListener('drop', (e) => {
                         e.preventDefault();
                         card.classList.remove('drag-over');
-                        if (dragSourceIndex === null || dragSourceIndex === originalIndex) return;
-
-                        pushState();
-                        const movedItem = tasks.splice(dragSourceIndex, 1)[0];
-                        tasks.splice(originalIndex, 0, movedItem);
-                        dragSourceIndex = null;
-                        calculateAndRender();
-                        saveToLocalStorage();
+                        const targetIndex = parseInt(card.getAttribute('data-index'), 10);
+                        if (dragSourceIndex !== null && targetIndex !== null && dragSourceIndex !== targetIndex) {
+                            pushState();
+                            const [movedItem] = tasks.splice(dragSourceIndex, 1);
+                            tasks.splice(targetIndex, 0, movedItem);
+                            calculateAndRender();
+                            saveToLocalStorage();
+                        }
                     });
 
-                    const checkbox = card.querySelector(`#check-${item.id}`);
-                    if (checkbox) {
-                        checkbox.addEventListener('change', (e) => {
+                    // Completion Toggle
+                    const chk = card.querySelector(`#check-${item.id}`);
+                    if (chk) {
+                        chk.addEventListener('change', (e) => {
                             pushState();
-                            const found = tasks.find(t => t.id === item.id);
-                            if (found) {
-                                found.completed = e.target.checked;
-                                calculateAndRender();
-                                saveToLocalStorage();
-                            }
+                            const found = tasks.find(x => x.id === item.id);
+                            if (found) found.completed = e.target.checked;
+                            calculateAndRender();
+                            saveToLocalStorage();
                         });
                     }
                 }
@@ -1690,346 +1688,243 @@
             pushState();
             tasks = tasks.filter(t => t.id !== id);
             calculateAndRender();
+            calculatePomodoroSchedule();
             saveToLocalStorage();
         };
 
-        function escapeHtml(str) {
-            return String(str).replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        function copyScheduleText() {
+            const { allocatedTasks } = allocateTaskTimes();
+            let text = `--- MASTER SCHEDULE (${totalDurationInput.value}m) ---\n`;
+            allocatedTasks.forEach((t, i) => {
+                text += `${i + 1}. [${t.allocated}m] ${t.title} (${t.rating}x weight)\n`;
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                showUndoToast("Schedule Copied to Clipboard", "fa-copy");
             });
         }
 
-        // Pomodoro Engine Logic with Fixed Events Integration
-        modeLiveBtn.addEventListener('click', () => {
-            pushState();
-            isLivePomoMode = true;
-            modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
-            modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
-            customStartTimeWrapper.classList.add('hidden');
-            timeSyncStatus.textContent = "● LIVE SYNC";
-            timeSyncStatus.className = "text-[10px] text-emerald-400 font-mono";
-            calculatePomodoroSchedule();
-            saveToLocalStorage();
-        });
+        function exportScheduleTxt() {
+            const { allocatedTasks } = allocateTaskTimes();
+            let text = `======================================\n`;
+            text += `AuTomator Schedule Export\n`;
+            text += `Total Allocated: ${totalDurationInput.value} mins\n`;
+            text += `======================================\n\n`;
+            allocatedTasks.forEach((t, i) => {
+                text += `${i + 1}. ${t.title.toUpperCase()}\n   Duration: ${t.allocated} mins\n   Weight: ${t.rating}x\n\n`;
+            });
 
-        modeCustomBtn.addEventListener('click', () => {
-            pushState();
-            isLivePomoMode = false;
-            modeCustomBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-white bg-purple-600/80 shadow transition";
-            modeLiveBtn.className = "py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition";
-            customStartTimeWrapper.classList.remove('hidden');
-            timeSyncStatus.textContent = "○ CUSTOM TIME";
-            timeSyncStatus.className = "text-[10px] text-amber-400 font-mono";
-            calculatePomodoroSchedule();
-            saveToLocalStorage();
-        });
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `AuTomator_Schedule_${new Date().toISOString().slice(0, 10)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
-        integrateFixedEventsToggle.addEventListener('change', () => {
-            pushState();
-            calculatePomodoroSchedule();
-            saveToLocalStorage();
-        });
-
+        // Pomodoro Bedtime Planner Engine
         function calculatePomodoroSchedule() {
-            const workMin = Math.max(1, parseInt(workDurationInput.value) || 25);
-            const shortBreakMin = Math.max(0, parseInt(shortBreakDurationInput.value) || 5);
-            const longBreakMin = Math.max(0, parseInt(longBreakDurationInput.value) || 15);
-            const sessionsPerCycle = Math.max(1, parseInt(sessionsPerCycleInput.value) || 4);
-            const integrateEvents = integrateFixedEventsToggle.checked;
+            const workMins = getSanitizedInput(workDurationInput, 25);
+            const shortBreakMins = getSanitizedInput(shortBreakDurationInput, 5);
+            const longBreakMins = getSanitizedInput(longBreakDurationInput, 15);
+            const sessionsPerCycle = getSanitizedInput(sessionsPerCycleInput, 4);
 
             let startTime = new Date();
             if (!isLivePomoMode && customStartTimeInput.value) {
-                const [cHours, cMins] = customStartTimeInput.value.split(':').map(Number);
-                startTime.setHours(cHours, cMins, 0, 0);
-            } else {
-                startTime.setSeconds(0, 0);
+                const [ch, cm] = customStartTimeInput.value.split(':').map(Number);
+                if (!isNaN(ch) && !isNaN(cm)) startTime.setHours(ch, cm, 0, 0);
             }
 
-            let bedtime = new Date(startTime);
+            let bedtime = new Date(startTime.getTime());
             if (pomoBedTimeInput.value) {
-                const [bHours, bMins] = pomoBedTimeInput.value.split(':').map(Number);
-                bedtime.setHours(bHours, bMins, 0, 0);
-                if (bedtime <= startTime) bedtime.setDate(bedtime.getDate() + 1);
-            } else {
-                bedtime.setHours(23, 0, 0, 0);
-                if (bedtime <= startTime) bedtime.setDate(bedtime.getDate() + 1);
+                const [bh, bm] = pomoBedTimeInput.value.split(':').map(Number);
+                if (!isNaN(bh) && !isNaN(bm)) {
+                    bedtime.setHours(bh, bm, 0, 0);
+                    if (bedtime <= startTime) bedtime.setDate(bedtime.getDate() + 1);
+                }
             }
 
             effectiveStartTimeTag.textContent = `Starts: ${formatTimeShort(startTime)}`;
-
-            const totalAvailableMs = bedtime - startTime;
-            const totalAvailableMinutes = Math.floor(totalAvailableMs / (1000 * 60));
-
-            if (totalAvailableMinutes <= 0) {
-                bedtimeStatusTitle.textContent = "Bedtime Reached!";
-                bedtimeStatusSubtext.textContent = "Target bedtime is set equal to or earlier than your start time.";
-                return;
-            }
-
-            // Build sorted list of fixed events
-            let activeEvents = [];
-            if (integrateEvents && fixedEvents.length > 0) {
-                activeEvents = fixedEvents.map(evt => {
-                    const [sh, sm] = evt.startTime.split(':').map(Number);
-                    let evtStart = new Date(startTime.getTime());
-                    evtStart.setHours(sh, sm, 0, 0);
-                    if (evtStart < startTime) evtStart.setDate(evtStart.getDate() + 1);
-                    let dur = evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime);
-                    let evtEnd = new Date(evtStart.getTime() + dur * 60 * 1000);
-                    return { ...evt, eventStart: evtStart, eventEnd: evtEnd, duration: dur };
-                }).filter(e => e.eventStart < bedtime).sort((a, b) => a.eventStart - b.eventStart);
-            }
-
-            const scheduleBlocks = [];
-            let currentTimeCursor = new Date(startTime);
-            let workSessionCounter = 0;
-            let currentCycleSession = 0;
-
-            let totalFocusMins = 0;
-            let totalBreakMins = 0;
-            let totalFixedMins = 0;
-            let activeBlockAtBedtime = null;
-
-            while (currentTimeCursor < bedtime) {
-                // Check for upcoming fixed event starting at current cursor
-                let matchingFixed = activeEvents.find(e => e.eventStart <= currentTimeCursor && e.eventEnd > currentTimeCursor);
-
-                if (matchingFixed) {
-                    let eventEnd = matchingFixed.eventEnd < bedtime ? matchingFixed.eventEnd : bedtime;
-                    let dur = Math.round((eventEnd - currentTimeCursor) / (60 * 1000));
-
-                    scheduleBlocks.push({
-                        id: scheduleBlocks.length + 1,
-                        type: `Fixed: ${matchingFixed.title}`,
-                        isWork: false,
-                        isBreak: false,
-                        isFixed: true,
-                        duration: dur,
-                        startTime: new Date(currentTimeCursor),
-                        endTime: eventEnd
-                    });
-
-                    totalFixedMins += dur;
-                    currentTimeCursor = eventEnd;
-                    continue;
-                }
-
-                // Normal Pomodoro block generation
-                let isWork = false;
-                let blockType = "";
-                let durationMins = 0;
-
-                const lastBlock = scheduleBlocks[scheduleBlocks.length - 1];
-                if (!lastBlock || lastBlock.isBreak || lastBlock.isFixed) {
-                    isWork = true;
-                    workSessionCounter++;
-                    currentCycleSession++;
-                    blockType = `Work Session #${workSessionCounter}`;
-                    durationMins = workMin;
-                } else {
-                    isWork = false;
-                    if (currentCycleSession % sessionsPerCycle === 0) {
-                        blockType = "Long Break";
-                        durationMins = longBreakMin;
-                    } else {
-                        blockType = "Short Break";
-                        durationMins = shortBreakMin;
-                    }
-                }
-
-                let plannedEnd = new Date(currentTimeCursor.getTime() + durationMins * 60 * 1000);
-
-                // Truncate block if a fixed event intersects
-                let nextFixed = activeEvents.find(e => e.eventStart > currentTimeCursor && e.eventStart < plannedEnd);
-                if (nextFixed) {
-                    plannedEnd = nextFixed.eventStart;
-                    durationMins = Math.round((plannedEnd - currentTimeCursor) / (60 * 1000));
-                }
-
-                if (durationMins > 0) {
-                    let actualEnd = plannedEnd < bedtime ? plannedEnd : bedtime;
-                    let actualDuration = Math.round((actualEnd - currentTimeCursor) / (60 * 1000));
-
-                    if (currentTimeCursor <= bedtime && actualEnd >= bedtime) {
-                        activeBlockAtBedtime = {
-                            type: blockType,
-                            isWork: isWork,
-                            minsCompleted: actualDuration,
-                            durationMins: durationMins,
-                            endTime: actualEnd
-                        };
-                    }
-
-                    scheduleBlocks.push({
-                        id: scheduleBlocks.length + 1,
-                        type: blockType,
-                        isWork,
-                        isBreak: !isWork,
-                        isFixed: false,
-                        duration: actualDuration,
-                        startTime: new Date(currentTimeCursor),
-                        endTime: actualEnd
-                    });
-
-                    if (isWork) totalFocusMins += actualDuration;
-                    else totalBreakMins += actualDuration;
-
-                    currentTimeCursor = actualEnd;
-                }
-            }
-
-            lastCalculatedPomoFocusMins = totalFocusMins;
-
-            // Headline Output
-            if (activeBlockAtBedtime) {
-                if (activeBlockAtBedtime.isWork) {
-                    bedtimeStatusTitle.textContent = `Working on ${activeBlockAtBedtime.type}`;
-                    bedtimeStatusSubtext.textContent = `You will be ${activeBlockAtBedtime.minsCompleted} mins into a ${activeBlockAtBedtime.durationMins}-minute focus session when bedtime hits at ${formatTimeShort(bedtime)}.`;
-                } else {
-                    bedtimeStatusTitle.textContent = `Relaxing on a ${activeBlockAtBedtime.type}`;
-                    bedtimeStatusSubtext.textContent = `You will be ${activeBlockAtBedtime.minsCompleted} mins into a break when bedtime arrives at ${formatTimeShort(bedtime)}.`;
-                }
-            } else {
-                bedtimeStatusTitle.textContent = `Bedtime aligned perfectly!`;
-                bedtimeStatusSubtext.textContent = `Your schedule completes right at ${formatTimeShort(bedtime)}.`;
-            }
-
-            const totalUsedMins = totalFocusMins + totalBreakMins + totalFixedMins;
-            const bufferMins = Math.max(0, totalAvailableMinutes - totalUsedMins);
-
-            const hours = Math.floor(totalAvailableMinutes / 60);
-            const mins = totalAvailableMinutes % 60;
-            metricTotalTime.textContent = `${hours}h ${mins}m`;
-            metricWorkSessions.textContent = workSessionCounter;
-            metricFocusTime.textContent = `${totalFocusMins}m`;
-            metricBreakTime.textContent = `${totalBreakMins}m`;
-
-            const focusPct = Math.min(100, Math.round((totalFocusMins / totalAvailableMinutes) * 100));
-            const breakPct = Math.min(100 - focusPct, Math.round((totalBreakMins / totalAvailableMinutes) * 100));
-            const fixedPct = Math.min(100 - focusPct - breakPct, Math.round((totalFixedMins / totalAvailableMinutes) * 100));
-            const bufferPct = Math.max(0, 100 - focusPct - breakPct - fixedPct);
-
-            ratioFocusBar.style.width = `${focusPct}%`;
-            ratioBreakBar.style.width = `${breakPct}%`;
-            ratioFixedBar.style.width = `${fixedPct}%`;
-            ratioBufferBar.style.width = `${bufferPct}%`;
-
-            timeUtilizationRatio.textContent = `${focusPct}% Productive Focus`;
-            bufferTimeText.textContent = `${bufferMins}m buffer`;
-
-            renderPomoTimeline(scheduleBlocks, startTime, bedtime);
-            renderPomoBlocksList(scheduleBlocks, bedtime);
-        }
-
-        function renderPomoTimeline(blocks, startTime, bedtime) {
-            pomoTimelineContainer.innerHTML = '';
             pomoTimelineStartLabel.textContent = formatTimeShort(startTime);
             pomoTimelineEndLabel.textContent = `${formatTimeShort(bedtime)} Bedtime`;
 
-            const totalMs = bedtime - startTime;
-            if (totalMs <= 0) return;
+            let availableMins = Math.max(0, Math.round((bedtime - startTime) / (60 * 1000)));
 
-            blocks.forEach(block => {
+            let activeFixedEvents = [];
+            if (integrateFixedEventsToggle.checked) {
+                activeFixedEvents = fixedEvents.map(evt => {
+                    const [eh, em] = evt.startTime.split(':').map(Number);
+                    let evtDate = new Date(startTime.getTime());
+                    evtDate.setHours(eh, em, 0, 0);
+                    if (evtDate < startTime) evtDate.setDate(evtDate.getDate() + 1);
+                    return { ...evt, duration: evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime), startDate: evtDate };
+                }).sort((a, b) => a.startDate - b.startDate);
+            }
+
+            let blocks = [];
+            let currentTime = new Date(startTime.getTime());
+            let sessionIndex = 1;
+            let focusAccumulator = 0;
+            let breakAccumulator = 0;
+            let fixedAccumulator = 0;
+
+            while (currentTime < bedtime) {
+                if (activeFixedEvents.length > 0 && activeFixedEvents[0].startDate <= currentTime) {
+                    let evt = activeFixedEvents.shift();
+                    let evtEnd = new Date(evt.startDate.getTime() + evt.duration * 60 * 1000);
+                    let actualEnd = evtEnd > bedtime ? bedtime : evtEnd;
+                    let dur = Math.round((actualEnd - currentTime) / (60 * 1000));
+
+                    if (dur > 0) {
+                        blocks.push({ type: 'FIXED', title: evt.title, duration: dur, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(actualEnd) });
+                        fixedAccumulator += dur;
+                        currentTime = actualEnd;
+                    }
+                    continue;
+                }
+
+                // Focus Session
+                let workEnd = new Date(currentTime.getTime() + workMins * 60 * 1000);
+                if (activeFixedEvents.length > 0 && activeFixedEvents[0].startDate < workEnd) {
+                    let evt = activeFixedEvents[0];
+                    let minsBefore = Math.round((evt.startDate - currentTime) / (60 * 1000));
+                    if (minsBefore >= 5) {
+                        blocks.push({ type: 'WORK', title: `Focus Session #${sessionIndex}`, duration: minsBefore, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(evt.startDate) });
+                        focusAccumulator += minsBefore;
+                        currentTime = evt.startDate;
+                    }
+                    continue;
+                }
+
+                if (workEnd > bedtime) {
+                    let remainingWork = Math.round((bedtime - currentTime) / (60 * 1000));
+                    if (remainingWork > 0) {
+                        blocks.push({ type: 'WORK', title: `Focus Session #${sessionIndex} (Partial)`, duration: remainingWork, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(bedtime) });
+                        focusAccumulator += remainingWork;
+                    }
+                    break;
+                }
+
+                blocks.push({ type: 'WORK', title: `Focus Session #${sessionIndex}`, duration: workMins, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(workEnd) });
+                focusAccumulator += workMins;
+                currentTime = workEnd;
+
+                if (currentTime >= bedtime) break;
+
+                // Break Session
+                const isLongBreak = (sessionIndex % sessionsPerCycle === 0);
+                const breakLen = isLongBreak ? longBreakMins : shortBreakMins;
+                let breakEnd = new Date(currentTime.getTime() + breakLen * 60 * 1000);
+
+                if (breakEnd > bedtime) {
+                    let remainingBreak = Math.round((bedtime - currentTime) / (60 * 1000));
+                    if (remainingBreak > 0) {
+                        blocks.push({ type: 'BREAK', title: isLongBreak ? 'Long Break' : 'Short Break', duration: remainingBreak, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(bedtime) });
+                        breakAccumulator += remainingBreak;
+                    }
+                    break;
+                }
+
+                blocks.push({ type: 'BREAK', title: isLongBreak ? 'Long Break' : 'Short Break', duration: breakLen, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(breakEnd) });
+                breakAccumulator += breakLen;
+                currentTime = breakEnd;
+                sessionIndex++;
+            }
+
+            lastCalculatedPomoFocusMins = focusAccumulator;
+
+            // Render Metrics
+            const totalScheduledMins = focusAccumulator + breakAccumulator + fixedAccumulator;
+            const bufferMins = Math.max(0, availableMins - totalScheduledMins);
+
+            metricTotalTime.textContent = `${Math.floor(availableMins / 60)}h ${availableMins % 60}m`;
+            metricWorkSessions.textContent = blocks.filter(b => b.type === 'WORK').length;
+            metricFocusTime.textContent = `${focusAccumulator}m`;
+            metricBreakTime.textContent = `${breakAccumulator}m`;
+
+            if (availableMins > 0) {
+                const fPct = Math.min(100, (focusAccumulator / availableMins) * 100);
+                const bPct = Math.min(100, (breakAccumulator / availableMins) * 100);
+                const xPct = Math.min(100, (fixedAccumulator / availableMins) * 100);
+                const uPct = Math.min(100, (bufferMins / availableMins) * 100);
+
+                ratioFocusBar.style.width = `${fPct}%`;
+                ratioBreakBar.style.width = `${bPct}%`;
+                ratioFixedBar.style.width = `${xPct}%`;
+                ratioBufferBar.style.width = `${uPct}%`;
+                timeUtilizationRatio.textContent = `${fPct.toFixed(0)}% Productive`;
+            }
+            bufferTimeText.textContent = `${bufferMins}m buffer`;
+
+            // Bedtime Arrival Summary Text
+            const completedSessions = blocks.filter(b => b.type === 'WORK').length;
+            bedtimeStatusTitle.textContent = `${completedSessions} Focus Sessions Completed`;
+            bedtimeStatusSubtext.textContent = `By bedtime at ${formatTimeShort(bedtime)}, you will have completed ${focusAccumulator} mins of deep focus across ${completedSessions} sessions with ${breakAccumulator} mins of breaks.`;
+
+            renderPomoVisualTimeline(blocks, availableMins);
+            renderPomoBlockCards(blocks);
+        }
+
+        function renderPomoVisualTimeline(blocks, totalMins) {
+            pomoTimelineContainer.innerHTML = '';
+            if (blocks.length === 0 || totalMins <= 0) return;
+
+            blocks.forEach(b => {
+                const pct = (b.duration / totalMins) * 100;
                 const seg = document.createElement('div');
-                const durationMs = block.endTime - block.startTime;
-                const widthPct = Math.max(1, (durationMs / totalMs) * 100);
+                let bgClass = 'bg-purple-500';
+                if (b.type === 'BREAK') bgClass = 'bg-cyan-500';
+                if (b.type === 'FIXED') bgClass = 'bg-amber-500';
 
-                let bgClass = block.isWork ? 'bg-gradient-to-r from-purple-500 to-pink-500' : (block.isFixed ? 'bg-amber-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500');
-
-                seg.className = `h-full rounded transition-all cursor-pointer hover:brightness-125 ${bgClass}`;
-                seg.style.width = `${widthPct}%`;
-                seg.title = `${block.type} (${block.duration} mins) [${formatTimeShort(block.startTime)} - ${formatTimeShort(block.endTime)}]`;
+                seg.className = `h-full ${bgClass} rounded-md transition-all cursor-pointer hover:brightness-125`;
+                seg.style.width = `${pct}%`;
+                seg.title = `${b.title} (${b.duration}m: ${b.startStr} - ${b.endStr})`;
                 pomoTimelineContainer.appendChild(seg);
             });
         }
 
-        function renderPomoBlocksList(blocks, bedtime) {
+        function renderPomoBlockCards(blocks) {
             pomoBlocksList.innerHTML = '';
             pomoTotalBlockCountBadge.textContent = `${blocks.length} Blocks`;
 
-            blocks.forEach(block => {
+            if (blocks.length === 0) {
+                pomoBlocksList.innerHTML = `<div class="col-span-full py-8 text-center text-slate-500 font-medium">No sessions scheduled before bedtime.</div>`;
+                return;
+            }
+
+            blocks.forEach((b, idx) => {
                 const card = document.createElement('div');
-                const isPastBedtime = block.startTime >= bedtime;
+                let badgeClass = 'badge-purple';
+                let iconClass = 'fa-briefcase';
+                if (b.type === 'BREAK') {
+                    badgeClass = 'badge-blue';
+                    iconClass = 'fa-mug-hot';
+                } else if (b.type === 'FIXED') {
+                    badgeClass = 'badge-amber';
+                    iconClass = 'fa-lock';
+                }
 
-                let badgeStyle = block.isWork ? 'badge-purple' : (block.isFixed ? 'badge-amber' : 'badge-blue');
-                let iconClass = block.isWork ? 'fa-briefcase' : (block.isFixed ? 'fa-lock' : 'fa-mug-hot');
-
-                card.className = `aero-card p-3 space-y-1.5 text-xs ${isPastBedtime ? 'opacity-40 border-rose-500/30' : ''}`;
+                card.className = "aero-card p-3 space-y-1.5 text-xs flex flex-col justify-between";
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="pill-badge ${badgeStyle} text-[10px]">
-                            <i class="fa-solid ${iconClass} text-[9px]"></i> ${escapeHtml(block.type)}
+                        <span class="font-bold text-slate-200 flex items-center gap-1.5 truncate">
+                            <i class="fa-solid ${iconClass} text-[11px] text-pink-300"></i> ${escapeHtml(b.title)}
                         </span>
-                        <span class="font-mono text-slate-400 text-[11px]">${block.duration}m</span>
+                        <span class="pill-badge ${badgeClass} text-[10px]">${b.duration}m</span>
                     </div>
-                    <div class="font-mono font-bold text-slate-200 flex items-center gap-1 pt-1">
-                        <i class="fa-regular fa-clock text-pink-300"></i> ${formatTimeShort(block.startTime)} - ${formatTimeShort(block.endTime)}
+                    <div class="flex items-center justify-between font-mono text-[11px] text-slate-400 pt-1 border-t border-white/5">
+                        <span>#${idx + 1}</span>
+                        <span class="text-purple-300 font-semibold">${b.startStr} - ${b.endStr}</span>
                     </div>
                 `;
                 pomoBlocksList.appendChild(card);
             });
         }
 
-        // Input Event Listeners with Auto-Save
-        totalDurationInput.addEventListener('input', () => { calculateAndRender(); saveToLocalStorage(); });
-        startTimeInput.addEventListener('change', () => { calculateAndRender(); saveToLocalStorage(); });
-        workDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-        shortBreakDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-        longBreakDurationInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-        sessionsPerCycleInput.addEventListener('input', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-        customStartTimeInput.addEventListener('change', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-
-        calculateBtn.addEventListener('click', () => { calculateAndRender(); saveToLocalStorage(); });
-        recalculatePomoBtn.addEventListener('click', () => { calculatePomodoroSchedule(); saveToLocalStorage(); });
-
-        loadSampleBtn.addEventListener('click', () => {
-            pushState();
-            tasks = [...sampleTasks.map(t => ({ ...t }))];
-            fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
-            totalDurationInput.value = 205;
-            updateFixedEventsUI();
-            calculateAndRender();
-            calculatePomodoroSchedule();
-            saveToLocalStorage();
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initDefaults();
         });
-
-        resetAllBtn.addEventListener('click', () => {
-            pushState();
-            tasks = [];
-            fixedEvents = [];
-            updateFixedEventsUI();
-            calculateAndRender();
-            calculatePomodoroSchedule();
-            saveToLocalStorage();
-        });
-
-        copyListBtn.addEventListener('click', () => {
-            const { allocatedTasks, targetTotal } = allocateTaskTimes();
-            let text = `Master Schedule & Task Allocations (Total Focus Time: ${targetTotal} mins):\n----------------------------------------------------------\n`;
-            fixedEvents.forEach(e => text += `[FIXED EVENT] ${e.title} @ ${e.startTime} - ${e.endTime} (${e.duration} mins)\n`);
-            allocatedTasks.forEach(t => text += `• ${t.title} - ${t.allocated} mins\n`);
-
-            navigator.clipboard.writeText(text);
-            copyListBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i> Copied!`;
-            setTimeout(() => copyListBtn.innerHTML = `<i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule`, 2000);
-        });
-
-        exportTxtBtn.addEventListener('click', () => {
-            const { allocatedTasks, targetTotal } = allocateTaskTimes();
-            let text = `Master Daily Schedule & Task Allocations\nTotal Focus Time: ${targetTotal} minutes\n========================================================\n\n`;
-            allocatedTasks.forEach((t, i) => text += `${i + 1}. [${t.completed ? 'X' : ' '}] ${t.title} - ${t.allocated} mins\n`);
-
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `master-schedule-${targetTotal}m.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-        // Initialize Defaults
-        window.addEventListener('DOMContentLoaded', initDefaults);
     </script>
 </body>
 </html>

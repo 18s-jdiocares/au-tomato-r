@@ -1555,17 +1555,22 @@
                     });
                     currentCursor = evtEnd;
                 } else if (taskQueue.length > 0) {
-                    let task = taskQueue.shift();
+                    let task = taskQueue[0]; // Peek at task without shifting immediately
                     let taskEnd = new Date(currentCursor.getTime() + task.allocated * 60 * 1000);
 
                     if (fixedQueue.length > 0 && fixedQueue[0].eventDate < taskEnd) {
                         let nextFixed = fixedQueue[0];
                         let minsBeforeFixed = Math.round((nextFixed.eventDate - currentCursor) / (60 * 1000));
                         if (minsBeforeFixed >= 5) {
+                            taskQueue.shift(); // Safely remove task
                             masterTimelineItems.push({ type: 'TASK', ...task, allocated: minsBeforeFixed, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(nextFixed.eventDate) });
+                            currentCursor = nextFixed.eventDate;
+                        } else {
+                            // If less than 5 minutes remain before fixed event, jump cursor to fixed event start
                             currentCursor = nextFixed.eventDate;
                         }
                     } else {
+                        taskQueue.shift(); // Safely remove task
                         masterTimelineItems.push({ type: 'TASK', ...task, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(taskEnd) });
                         currentCursor = taskEnd;
                     }
@@ -1659,10 +1664,11 @@
                         e.preventDefault();
                         card.classList.remove('drag-over');
                         const targetIndex = parseInt(card.getAttribute('data-index'), 10);
-                        if (dragSourceIndex !== null && targetIndex !== null && dragSourceIndex !== targetIndex) {
+                        if (dragSourceIndex !== null && !isNaN(dragSourceIndex) && dragSourceIndex >= 0 && targetIndex !== null && !isNaN(targetIndex) && targetIndex >= 0 && dragSourceIndex !== targetIndex) {
                             pushState();
                             const [movedItem] = tasks.splice(dragSourceIndex, 1);
                             tasks.splice(targetIndex, 0, movedItem);
+                            dragSourceIndex = null;
                             calculateAndRender();
                             saveToLocalStorage();
                         }

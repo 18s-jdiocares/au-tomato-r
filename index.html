@@ -1774,7 +1774,12 @@
             let breakAccumulator = 0;
             let fixedAccumulator = 0;
 
-            while (currentTime < bedtime) {
+            // Guard against infinite loop iterations
+            let safetyGuard = 0;
+
+            while (currentTime < bedtime && safetyGuard < 1000) {
+                safetyGuard++;
+
                 if (activeFixedEvents.length > 0 && activeFixedEvents[0].startDate <= currentTime) {
                     let evt = activeFixedEvents.shift();
                     let evtEnd = new Date(evt.startDate.getTime() + evt.duration * 60 * 1000);
@@ -1785,6 +1790,9 @@
                         blocks.push({ type: 'FIXED', title: evt.title, duration: dur, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(actualEnd) });
                         fixedAccumulator += dur;
                         currentTime = actualEnd;
+                    } else if (actualEnd <= currentTime) {
+                        // Advance cursor past invalid/expired fixed event to prevent infinite looping
+                        currentTime = evtEnd > currentTime ? evtEnd : new Date(currentTime.getTime() + 60000);
                     }
                     continue;
                 }
@@ -1797,6 +1805,8 @@
                     if (minsBefore >= 5) {
                         blocks.push({ type: 'WORK', title: `Focus Session #${sessionIndex}`, duration: minsBefore, startStr: formatTimeShort(currentTime), endStr: formatTimeShort(evt.startDate) });
                         focusAccumulator += minsBefore;
+                        currentTime = evt.startDate;
+                    } else {
                         currentTime = evt.startDate;
                     }
                     continue;
@@ -1870,6 +1880,18 @@
             renderPomoVisualTimeline(blocks, availableMins);
             renderPomoBlockCards(blocks);
         }
+
+        // Safe Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!loadFromLocalStorage()) {
+                updateFixedEventsUI();
+                calculateAndRender();
+            } else {
+                updateFixedEventsUI();
+                calculateAndRender();
+                calculatePomodoroSchedule();
+            }
+        });
 
         function renderPomoVisualTimeline(blocks, totalMins) {
             pomoTimelineContainer.innerHTML = '';

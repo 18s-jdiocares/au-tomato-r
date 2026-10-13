@@ -1569,22 +1569,34 @@
                     });
                     currentCursor = evtEnd;
                 } else if (taskQueue.length > 0) {
-                    let task = taskQueue[0]; // Peek at task without shifting immediately
+                    let task = taskQueue[0];
                     let taskEnd = new Date(currentCursor.getTime() + task.allocated * 60 * 1000);
 
                     if (fixedQueue.length > 0 && fixedQueue[0].eventDate < taskEnd) {
                         let nextFixed = fixedQueue[0];
                         let minsBeforeFixed = Math.round((nextFixed.eventDate - currentCursor) / (60 * 1000));
+                        
                         if (minsBeforeFixed >= 5) {
-                            taskQueue.shift(); // Safely remove task
-                            masterTimelineItems.push({ type: 'TASK', ...task, allocated: minsBeforeFixed, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(nextFixed.eventDate) });
+                            // Split task: Record Part 1 for time before fixed event
+                            masterTimelineItems.push({ 
+                                type: 'TASK', 
+                                ...task, 
+                                title: `${task.title} (Part 1)`,
+                                allocated: minsBeforeFixed, 
+                                startTimeStr: formatTimeShort(currentCursor), 
+                                endTimeStr: formatTimeShort(nextFixed.eventDate) 
+                            });
+                            
+                            // Mutate task in queue to hold remaining time for Part 2
+                            task.allocated -= minsBeforeFixed;
+                            task.title = `${task.title.replace(' (Part 1)', '')} (Part 2)`;
                             currentCursor = nextFixed.eventDate;
                         } else {
-                            // If less than 5 minutes remain before fixed event, jump cursor to fixed event start
+                            // Less than 5 mins remain: Jump cursor directly to fixed event
                             currentCursor = nextFixed.eventDate;
                         }
                     } else {
-                        taskQueue.shift(); // Safely remove task
+                        taskQueue.shift();
                         masterTimelineItems.push({ type: 'TASK', ...task, startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(taskEnd) });
                         currentCursor = taskEnd;
                     }

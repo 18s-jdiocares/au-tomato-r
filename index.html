@@ -1536,19 +1536,33 @@
             let taskQueue = [...allocatedTasks];
 
             let fixedQueue = fixedEvents.map(evt => {
-                const [eh, em] = evt.startTime.split(':').map(Number);
-                let evtDate = new Date(startBase.getTime());
-                evtDate.setHours(eh, em, 0, 0);
-                if (evtDate < startBase) evtDate.setDate(evtDate.getDate() + 1);
-                return { ...evt, duration: evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime), eventDate: evtDate };
-            }).sort((a, b) => a.eventDate - b.eventDate);
+                const [sh, sm] = evt.startTime.split(':').map(Number);
+                const [eh, em] = evt.endTime.split(':').map(Number);
+                let startDate = new Date(startBase.getTime());
+                startDate.setHours(sh, sm, 0, 0);
+                let endDate = new Date(startBase.getTime());
+                endDate.setHours(eh, em, 0, 0);
+                if (endDate <= startDate) endDate.setDate(endDate.getDate() + 1);
+
+                if (endDate <= startBase) {
+                    startDate.setDate(startDate.getDate() + 1);
+                    endDate.setDate(endDate.getDate() + 1);
+                }
+
+                let effectiveStart = startDate < startBase ? startBase : startDate;
+                let duration = Math.max(0, Math.round((endDate - effectiveStart) / (60 * 1000)));
+
+                return { ...evt, duration, eventDate: effectiveStart, endDate };
+            })
+            .filter(evt => evt.duration > 0)
+            .sort((a, b) => a.eventDate - b.eventDate);
 
             let masterTimelineItems = [];
 
             while (taskQueue.length > 0 || fixedQueue.length > 0) {
                 if (fixedQueue.length > 0 && fixedQueue[0].eventDate <= currentCursor) {
                     let evt = fixedQueue.shift();
-                    let evtEnd = new Date(evt.eventDate.getTime() + evt.duration * 60 * 1000);
+                    let evtEnd = evt.endDate;
                     masterTimelineItems.push({
                         type: 'FIXED', id: evt.id, title: evt.title, duration: evt.duration,
                         startTimeStr: formatTimeShort(evt.eventDate), endTimeStr: formatTimeShort(evtEnd)
@@ -1577,7 +1591,7 @@
                 } else if (fixedQueue.length > 0) {
                     let evt = fixedQueue.shift();
                     currentCursor = new Date(evt.eventDate.getTime());
-                    let evtEnd = new Date(currentCursor.getTime() + evt.duration * 60 * 1000);
+                    let evtEnd = evt.endDate;
                     masterTimelineItems.push({
                         type: 'FIXED', id: evt.id, title: evt.title, duration: evt.duration,
                         startTimeStr: formatTimeShort(currentCursor), endTimeStr: formatTimeShort(evtEnd)
@@ -1759,12 +1773,28 @@
             let activeFixedEvents = [];
             if (integrateFixedEventsToggle.checked) {
                 activeFixedEvents = fixedEvents.map(evt => {
-                    const [eh, em] = evt.startTime.split(':').map(Number);
-                    let evtDate = new Date(startTime.getTime());
-                    evtDate.setHours(eh, em, 0, 0);
-                    if (evtDate < startTime) evtDate.setDate(evtDate.getDate() + 1);
-                    return { ...evt, duration: evt.duration || calculateDurationFromTimes(evt.startTime, evt.endTime), startDate: evtDate };
-                }).sort((a, b) => a.startDate - b.startDate);
+                    const [sh, sm] = evt.startTime.split(':').map(Number);
+                    const [eh, em] = evt.endTime.split(':').map(Number);
+                    
+                    let startDate = new Date(startTime.getTime());
+                    startDate.setHours(sh, sm, 0, 0);
+                    
+                    let endDate = new Date(startTime.getTime());
+                    endDate.setHours(eh, em, 0, 0);
+                    if (endDate <= startDate) endDate.setDate(endDate.getDate() + 1);
+
+                    if (endDate <= startTime) {
+                        startDate.setDate(startDate.getDate() + 1);
+                        endDate.setDate(endDate.getDate() + 1);
+                    }
+
+                    let effectiveStart = startDate < startTime ? startTime : startDate;
+                    let duration = Math.max(0, Math.round((endDate - effectiveStart) / (60 * 1000)));
+
+                    return { ...evt, duration, startDate: effectiveStart, endDate };
+                })
+                .filter(evt => evt.startDate < bedtime && evt.endDate > startTime && evt.duration > 0)
+                .sort((a, b) => a.startDate - b.startDate);
             }
 
             let blocks = [];
@@ -1782,8 +1812,7 @@
 
                 if (activeFixedEvents.length > 0 && activeFixedEvents[0].startDate <= currentTime) {
                     let evt = activeFixedEvents.shift();
-                    let evtEnd = new Date(evt.startDate.getTime() + evt.duration * 60 * 1000);
-                    let actualEnd = evtEnd > bedtime ? bedtime : evtEnd;
+                    let actualEnd = evt.endDate > bedtime ? bedtime : evt.endDate;
                     let dur = Math.round((actualEnd - currentTime) / (60 * 1000));
 
                     if (dur > 0) {
@@ -1791,8 +1820,7 @@
                         fixedAccumulator += dur;
                         currentTime = actualEnd;
                     } else if (actualEnd <= currentTime) {
-                        // Advance cursor past invalid/expired fixed event to prevent infinite looping
-                        currentTime = evtEnd > currentTime ? evtEnd : new Date(currentTime.getTime() + 60000);
+                        currentTime = evt.endDate > currentTime ? evt.endDate : new Date(currentTime.getTime() + 60000);
                     }
                     continue;
                 }
@@ -1881,18 +1909,6 @@
             renderPomoBlockCards(blocks);
         }
 
-        // Safe Initialization
-        window.addEventListener('DOMContentLoaded', () => {
-            if (!loadFromLocalStorage()) {
-                updateFixedEventsUI();
-                calculateAndRender();
-            } else {
-                updateFixedEventsUI();
-                calculateAndRender();
-                calculatePomodoroSchedule();
-            }
-        });
-
         function renderPomoVisualTimeline(blocks, totalMins) {
             pomoTimelineContainer.innerHTML = '';
             if (blocks.length === 0 || totalMins <= 0) return;
@@ -1949,9 +1965,16 @@
             });
         }
 
-        // Initialize App
+        // Safe Initialization
         window.addEventListener('DOMContentLoaded', () => {
-            initDefaults();
+            if (!loadFromLocalStorage()) {
+                updateFixedEventsUI();
+                calculateAndRender();
+            } else {
+                updateFixedEventsUI();
+                calculateAndRender();
+                calculatePomodoroSchedule();
+            }
         });
     </script>
 </body>

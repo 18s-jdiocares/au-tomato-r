@@ -12,6 +12,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDK (v9 Compatibility Mode for easy Single-File Integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
     <style>
         body {
@@ -112,7 +117,6 @@
             cursor: pointer;
         }
 
-        /* Drag & Drop Visual Styles */
         .draggable-card {
             cursor: grab;
             transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
@@ -129,7 +133,6 @@
             border-top: 3px solid #ec4899 !important;
         }
 
-        /* Badges */
         .pill-badge {
             font-size: 0.75rem;
             font-weight: 700;
@@ -193,31 +196,42 @@
                 </button>
             </div>
 
-            <!-- Actions & Undo / Redo -->
-            <div class="hidden sm:flex items-center space-x-3">
-                <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
+            <!-- User Auth & Quick Actions -->
+            <div class="flex items-center space-x-3">
+                <div class="hidden md:flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <strong id="liveClock" class="text-white font-mono">12:00:00 PM</strong>
                 </div>
-                <div class="flex items-center gap-1">
-                    <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Undo action (Ctrl+Z)">
-                        <i class="fa-solid fa-rotate-left text-purple-300"></i> Undo
+
+                <!-- Google Account Bar -->
+                <div id="authContainer" class="flex items-center gap-2">
+                    <button id="googleSignInBtn" onclick="signInWithGoogle()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-2 text-white">
+                        <i class="fa-brands fa-google text-pink-300"></i> Sign in with Google
                     </button>
-                    <button id="redoBtn" onclick="redo()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-purple-200" title="Redo action (Ctrl+Y)">
-                        <i class="fa-solid fa-rotate-right text-purple-300"></i> Redo
+                    <div id="userProfile" class="hidden flex items-center gap-2 bg-black/40 border border-white/15 px-2.5 py-1 rounded-xl">
+                        <img id="userAvatar" class="w-6 h-6 rounded-full border border-purple-400/50" src="" alt="User">
+                        <span id="userName" class="text-xs font-semibold text-purple-200 max-w-[100px] truncate">User</span>
+                        <span id="syncIndicator" class="text-[10px] text-emerald-400 font-mono" title="Synced to Cloud">● Synced</span>
+                        <button onclick="signOutUser()" class="text-slate-400 hover:text-rose-400 ml-1 text-xs" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    </div>
+                </div>
+
+                <div class="hidden lg:flex items-center gap-1">
+                    <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 text-purple-200" title="Undo (Ctrl+Z)">
+                        <i class="fa-solid fa-rotate-left text-purple-300"></i>
+                    </button>
+                    <button id="redoBtn" onclick="redo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 text-purple-200" title="Redo (Ctrl+Y)">
+                        <i class="fa-solid fa-rotate-right text-purple-300"></i>
+                    </button>
+                    <button id="loadSampleBtn" onclick="loadSampleData()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
+                        <i class="fa-solid fa-list-check text-purple-300"></i> Sample
                     </button>
                 </div>
-                <button id="loadSampleBtn" onclick="loadSampleData()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-list-check text-purple-300"></i> Sample Data
-                </button>
-                <button id="resetAllBtn" onclick="resetAllData()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-rose-300 hover:text-rose-200">
-                    <i class="fa-solid fa-trash-can text-rose-400"></i> Reset
-                </button>
             </div>
         </div>
     </header>
 
-    <!-- Toast Notification for Undo / Redo -->
+    <!-- Toast Notification -->
     <div id="undoToast" class="fixed bottom-5 right-5 z-50 bg-purple-900/90 text-white border border-purple-400/30 px-4 py-2.5 rounded-xl shadow-2xl backdrop-blur-md text-xs font-semibold flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
         <i id="toastIcon" class="fa-solid fa-rotate-left text-pink-300"></i>
         <span id="toastMessage">Action Undone</span>
@@ -228,7 +242,6 @@
 
         <!-- TAB 1: TASK ALLOCATOR & MASTER TIMELINE ENGINE -->
         <div id="taskAllocatorTab" class="space-y-6">
-            
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 <!-- Left Panel: Fixed Routine Constraints -->
@@ -284,11 +297,9 @@
                             </div>
                         </div>
 
-                        <!-- Fixed Events List -->
                         <div id="fixedEventsContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
                     </div>
 
-                    <!-- Calculated Work Window -->
                     <div class="bg-black/30 border border-white/10 rounded-xl p-3 flex items-center justify-between">
                         <div>
                             <div class="text-[11px] text-slate-400 font-medium">Calculated Free Work Time Window</div>
@@ -315,7 +326,6 @@
                             </div>
                         </div>
 
-                        <!-- Total Duration Input -->
                         <div class="space-y-1.5">
                             <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
                                 <span class="text-pink-300 flex items-center gap-1.5">Total Work Duration to Allocate</span>
@@ -329,7 +339,6 @@
                             </div>
                         </div>
 
-                        <!-- Presets -->
                         <div class="flex items-center justify-between text-xs pt-1">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[11px] text-slate-400 font-medium">Quick Presets:</span>
@@ -340,7 +349,6 @@
                             </div>
                         </div>
 
-                        <!-- Add Task Form -->
                         <div class="space-y-3 pt-3 border-t border-white/10">
                             <label class="text-xs font-semibold text-slate-300 block">Add Task Item</label>
                             <div class="space-y-2">
@@ -385,7 +393,6 @@
                         </div>
                     </div>
 
-                    <!-- Metric Breakdown Grid -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
                             <div class="text-[11px] text-slate-400 font-medium">Task Count</div>
@@ -406,7 +413,6 @@
                     </div>
                 </div>
 
-                <!-- Timeline Visual Bar -->
                 <div class="mt-5 pt-4 border-t border-white/10 space-y-2">
                     <div class="flex items-center justify-between text-xs font-semibold">
                         <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-column text-pink-300"></i> Master Schedule Block Distribution</span>
@@ -440,7 +446,6 @@
         <div id="pomodoroPlannerTab" class="space-y-6 hidden">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Left Panel: Pomodoro Controls -->
                 <div class="lg:col-span-5 aero-card p-5 space-y-5 flex flex-col justify-between">
                     <div>
                         <div class="aero-card-header -mx-5 -mt-5 p-4 mb-4 flex items-center justify-between">
@@ -491,7 +496,6 @@
 
                         <div class="border-t border-white/10 my-4"></div>
 
-                        <!-- Shared Integration Settings -->
                         <div class="space-y-4">
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
@@ -515,7 +519,6 @@
                                 </div>
                             </div>
 
-                            <!-- Integration Toggle -->
                             <div class="pt-3 border-t border-white/10">
                                 <label class="flex items-center justify-between cursor-pointer">
                                     <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
@@ -533,7 +536,6 @@
                     </button>
                 </div>
 
-                <!-- Right Panel: Executive Bedtime Arrival Summary -->
                 <div class="lg:col-span-7 flex flex-col gap-6">
                     <div class="aero-card p-6 relative overflow-hidden flex-1 flex flex-col justify-between">
                         <div>
@@ -548,7 +550,6 @@
                             </div>
                         </div>
 
-                        <!-- Metric Quick Cards Row -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
                             <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center">
                                 <div class="text-[11px] text-slate-400 font-medium">Total Time</div>
@@ -569,7 +570,6 @@
                         </div>
                     </div>
 
-                    <!-- Utilization Ratio Bar -->
                     <div class="aero-card p-5 space-y-3">
                         <div class="flex items-center justify-between text-xs font-semibold">
                             <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-pink-400"></i> Time Distribution Breakdown</span>
@@ -594,7 +594,6 @@
                 </div>
             </div>
 
-            <!-- Pomodoro Chronological Schedule Bar -->
             <div class="aero-card p-5 space-y-4">
                 <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
                     <div>
@@ -613,7 +612,6 @@
                 </div>
             </div>
 
-            <!-- Step-by-Step Pomodoro Cards -->
             <div class="aero-card p-5 space-y-4">
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
                     <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-emerald-400"></i> Step-by-Step Session Plan</h3>
@@ -643,7 +641,6 @@
                     <input type="text" id="editModalTitleInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm">
                 </div>
 
-                <!-- Fixed Event Editor -->
                 <div id="fixedEventFields" class="grid grid-cols-2 gap-3 hidden">
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-300">Start Time</label>
@@ -655,7 +652,6 @@
                     </div>
                 </div>
 
-                <!-- Task Editor -->
                 <div id="taskFields" class="space-y-3 hidden">
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-300">Length Rating (Proportional Mode)</label>
@@ -672,7 +668,6 @@
                             <button type="button" onclick="clearTaskFixedTimes()" class="text-[11px] text-teal-400 hover:text-teal-200 underline font-medium">Reset to Auto</button>
                         </div>
 
-                        <!-- Standalone Duration Input -->
                         <div class="space-y-1 bg-black/30 p-2.5 rounded-lg border border-white/10">
                             <label class="text-[11px] text-teal-200 font-semibold flex items-center justify-between">
                                 <span>Fixed Duration (Minutes)</span>
@@ -683,7 +678,6 @@
 
                         <div class="text-center text-[10px] text-slate-500 uppercase tracking-wider font-bold">OR Specific Range</div>
 
-                        <!-- Specific Start & End Range Inputs -->
                         <div class="grid grid-cols-2 gap-3">
                             <div class="space-y-1">
                                 <label class="text-[11px] text-slate-400 font-medium">Start Time</label>
@@ -713,8 +707,147 @@
         AuTomator &bull; Integrated Task Allocator & Pomodoro Bedtime Engine
     </footer>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Application Script -->
     <script>
+        // ==========================================
+        // FIREBASE AUTHENTICATION & CLOUD SYNC CONFIG
+        // ==========================================
+        // Replace with your Firebase Project Config credentials
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        // Initialize Firebase safely
+        try {
+            if (firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        currentUser = user;
+                        document.getElementById('googleSignInBtn').classList.add('hidden');
+                        document.getElementById('userProfile').classList.remove('hidden');
+                        document.getElementById('userAvatar').src = user.photoURL || '';
+                        document.getElementById('userName').textContent = user.displayName || 'User';
+                        loadFromCloud();
+                    } else {
+                        currentUser = null;
+                        document.getElementById('googleSignInBtn').classList.remove('hidden');
+                        document.getElementById('userProfile').classList.add('hidden');
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Firebase not configured or script failed to load", e);
+        }
+
+        function signInWithGoogle() {
+            if (!auth) {
+                alert("Please add your Firebase Configuration to index.html to enable Google Sign-In!");
+                return;
+            }
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then((result) => {
+                showUndoToast(`Welcome, ${result.user.displayName}`, "fa-user-check");
+            }).catch((error) => {
+                console.error("Sign-in failed", error);
+                alert("Google Sign-In failed: " + error.message);
+            });
+        }
+
+        function signOutUser() {
+            if (auth) {
+                auth.signOut().then(() => {
+                    showUndoToast("Signed Out", "fa-right-from-bracket");
+                });
+            }
+        }
+
+        function saveToCloud() {
+            if (!currentUser || !db) return;
+            const state = {
+                tasks,
+                fixedEvents,
+                totalDuration: totalDurationInput.value,
+                bedtime: bedtimeInput.value,
+                startTime: startTimeInput.value,
+                autoStart: autoStartToggle.checked,
+                workDuration: workDurationInput.value,
+                shortBreakDuration: shortBreakDurationInput.value,
+                longBreakDuration: longBreakDurationInput.value,
+                sessionsPerCycle: sessionsPerCycleInput.value,
+                isLivePomoMode,
+                customStartTime: customStartTimeInput.value,
+                integrateFixedEvents: integrateFixedEventsToggle.checked,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            const syncIndicator = document.getElementById('syncIndicator');
+            if (syncIndicator) {
+                syncIndicator.textContent = "● Syncing...";
+                syncIndicator.className = "text-[10px] text-amber-400 font-mono";
+            }
+
+            db.collection('user_schedules').doc(currentUser.uid).set(state, { merge: true })
+                .then(() => {
+                    if (syncIndicator) {
+                        syncIndicator.textContent = "● Synced";
+                        syncIndicator.className = "text-[10px] text-emerald-400 font-mono";
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error saving to cloud", err);
+                    if (syncIndicator) {
+                        syncIndicator.textContent = "○ Sync Error";
+                        syncIndicator.className = "text-[10px] text-rose-400 font-mono";
+                    }
+                });
+        }
+
+        function loadFromCloud() {
+            if (!currentUser || !db) return;
+            db.collection('user_schedules').doc(currentUser.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const state = doc.data();
+                    if (state.tasks) tasks = state.tasks;
+                    if (state.fixedEvents) fixedEvents = state.fixedEvents;
+                    if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
+                    if (state.bedtime !== undefined) {
+                        bedtimeInput.value = state.bedtime;
+                        pomoBedTimeInput.value = state.bedtime;
+                    }
+                    if (state.startTime !== undefined) startTimeInput.value = state.startTime;
+                    if (state.autoStart !== undefined) autoStartToggle.checked = state.autoStart;
+                    if (state.workDuration !== undefined) workDurationInput.value = state.workDuration;
+                    if (state.shortBreakDuration !== undefined) shortBreakDurationInput.value = state.shortBreakDuration;
+                    if (state.longBreakDuration !== undefined) longBreakDurationInput.value = state.longBreakDuration;
+                    if (state.sessionsPerCycle !== undefined) sessionsPerCycleInput.value = state.sessionsPerCycle;
+                    if (state.isLivePomoMode !== undefined) setPomoStartMode(state.isLivePomoMode);
+                    if (state.customStartTime !== undefined) customStartTimeInput.value = state.customStartTime;
+                    if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
+
+                    updateFixedEventsUI();
+                    calculateAndRender();
+                    calculatePomodoroSchedule();
+                    showUndoToast("Cloud Data Loaded", "fa-cloud-arrow-down");
+                }
+            });
+        }
+
+        // ==========================================
+        // CORE APPLICATION LOGIC
+        // ==========================================
         const STORAGE_KEY = 'automator_app_state_v1';
 
         function escapeHtml(str) {
@@ -722,7 +855,6 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Tab Navigation
         function switchTab(tabName) {
             const taskTab = document.getElementById('taskAllocatorTab');
             const pomoTab = document.getElementById('pomodoroPlannerTab');
@@ -745,7 +877,6 @@
             saveToLocalStorage();
         }
 
-        // Shared Bedtime Sync
         const bedtimeInput = document.getElementById('bedtimeInput');
         const pomoBedTimeInput = document.getElementById('pomoBedTimeInput');
 
@@ -764,7 +895,6 @@
             saveToLocalStorage();
         });
 
-        // DOM Elements
         const totalDurationInput = document.getElementById('totalDurationInput');
         const taskTitleInput = document.getElementById('taskTitleInput');
         const taskRatingSelect = document.getElementById('taskRatingSelect');
@@ -794,7 +924,6 @@
         const masterTimelineContainer = document.getElementById('masterTimelineContainer');
         const activeCountBadge = document.getElementById('activeCountBadge');
 
-        // Modal Elements
         const editModal = document.getElementById('editModal');
         const editModalTitle = document.getElementById('editModalTitle');
         const editModalItemId = document.getElementById('editModalItemId');
@@ -810,7 +939,6 @@
         const editModalTaskEndTimeInput = document.getElementById('editModalTaskEndTimeInput');
         const taskDurationPreview = document.getElementById('taskDurationPreview');
 
-        // Pomodoro DOM Elements
         const workDurationInput = document.getElementById('workDuration');
         const shortBreakDurationInput = document.getElementById('shortBreakDuration');
         const longBreakDurationInput = document.getElementById('longBreakDuration');
@@ -847,7 +975,6 @@
         const pomoBlocksList = document.getElementById('pomoBlocksList');
         const pomoTotalBlockCountBadge = document.getElementById('pomoTotalBlockCountBadge');
 
-        // Sample Data
         const sampleTasks = [
             { id: 1, title: 'lang', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
             { id: 2, title: 'nhs', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
@@ -866,7 +993,6 @@
             { id: 102, title: 'Study Group Call', startTime: '20:15', endTime: '20:45', duration: 30, isFixed: true }
         ];
 
-        // Application State
         let tasks = [...sampleTasks.map(t => ({ ...t }))];
         let fixedEvents = [...sampleEvents.map(e => ({ ...e }))];
         let undoStack = [];
@@ -881,7 +1007,6 @@
             'bg-teal-500', 'bg-violet-500', 'bg-fuchsia-500', 'bg-sky-500'
         ];
 
-        // LocalStorage Helper
         function saveToLocalStorage() {
             const state = {
                 tasks,
@@ -899,6 +1024,7 @@
                 integrateFixedEvents: integrateFixedEventsToggle.checked
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            saveToCloud();
         }
 
         function loadFromLocalStorage() {
@@ -964,7 +1090,6 @@
             saveToLocalStorage();
         }
 
-        // State & Undo/Redo Management
         function pushState() {
             if (undoStack.length >= 25) undoStack.shift();
             undoStack.push(getCurrentStateSnapshot());
@@ -1012,7 +1137,6 @@
             }, 2000);
         }
 
-        // Time Utility Functions
         function getCurrentTimeStr() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
@@ -1132,7 +1256,6 @@
             saveToLocalStorage();
         });
 
-        // Fixed Events Logic
         function sortFixedEvents() {
             fixedEvents.sort((a, b) => {
                 const [ah, am] = (a.startTime || '00:00').split(':').map(Number);
@@ -1220,7 +1343,6 @@
             return netWorkMins;
         }
 
-        // Add Task Logic
         addTaskBtn.addEventListener('click', () => {
             const title = taskTitleInput.value.trim();
             const rating = getSanitizedInput(taskRatingSelect, 2);
@@ -1245,7 +1367,6 @@
             if (e.key === 'Enter') addTaskBtn.click();
         });
 
-        // Edit Modal Logic
         window.openEditModal = function(id, type) {
             editModalItemId.value = id;
             editModalItemType.value = type;
@@ -1390,12 +1511,6 @@
             }
         }
 
-        /**
-         * Core Task Allocation Engine with Top-to-Bottom Priority Tie-Breaking.
-         * If several tasks have equal length rating / weight:
-         * - When adding +5 min increments (diff > 0): Items higher up (top) get priority.
-         * - When subtracting -5 min increments (diff < 0): Items lower down (bottom) lose time first.
-         */
         function allocateTaskTimes() {
             const targetTotal = getSanitizedInput(totalDurationInput, 0);
             if (tasks.length === 0 || targetTotal <= 0) {
@@ -1429,15 +1544,11 @@
                 while (diff !== 0 && iterations < 500) {
                     iterations++;
                     if (diff > 0) {
-                        // Priority 1: Higher residual.
-                        // Priority 2 (Tie breaker): Smaller originalIndex (Top of list gets +5m first).
                         dynamicAllocated.sort((a, b) => (b.residual - a.residual) || (a.originalIndex - b.originalIndex));
                         dynamicAllocated[0].allocated += 5;
                         dynamicAllocated[0].residual -= 5;
                         diff -= 5;
                     } else {
-                        // Priority 1: Lower residual.
-                        // Priority 2 (Tie breaker): Larger originalIndex (Bottom of list loses -5m first).
                         dynamicAllocated.sort((a, b) => (a.residual - b.residual) || (b.originalIndex - a.originalIndex));
                         let targetItem = dynamicAllocated.find(i => i.allocated > 5) || dynamicAllocated[0];
                         targetItem.allocated -= 5;
@@ -1447,7 +1558,6 @@
                 }
             }
 
-            // Restore initial order by original index
             dynamicAllocated.sort((a, b) => a.originalIndex - b.originalIndex);
 
             const dynamicMap = new Map(dynamicAllocated.map(t => [t.id, t]));
@@ -1575,9 +1685,7 @@
                     if (fixedQueue.length > 0 && fixedQueue[0].eventDate < taskEnd) {
                         let nextFixed = fixedQueue[0];
                         let minsBeforeFixed = Math.round((nextFixed.eventDate - currentCursor) / (60 * 1000));
-                        
                         if (minsBeforeFixed >= 5) {
-                            // Split task: Record Part 1 for time before fixed event
                             masterTimelineItems.push({ 
                                 type: 'TASK', 
                                 ...task, 
@@ -1586,13 +1694,10 @@
                                 startTimeStr: formatTimeShort(currentCursor), 
                                 endTimeStr: formatTimeShort(nextFixed.eventDate) 
                             });
-                            
-                            // Mutate task in queue to hold remaining time for Part 2
                             task.allocated -= minsBeforeFixed;
                             task.title = `${task.title.replace(' (Part 1)', '')} (Part 2)`;
                             currentCursor = nextFixed.eventDate;
                         } else {
-                            // Less than 5 mins remain: Jump cursor directly to fixed event
                             currentCursor = nextFixed.eventDate;
                         }
                     } else {
@@ -1669,7 +1774,6 @@
                         </div>
                     `;
 
-                    // Drag & Drop Event Handlers
                     card.addEventListener('dragstart', (e) => {
                         dragSourceIndex = parseInt(card.getAttribute('data-index'), 10);
                         card.classList.add('dragging');
@@ -1700,7 +1804,6 @@
                         }
                     });
 
-                    // Completion Toggle
                     const chk = card.querySelector(`#check-${item.id}`);
                     if (chk) {
                         chk.addEventListener('change', (e) => {
@@ -1754,7 +1857,6 @@
             URL.revokeObjectURL(url);
         }
 
-        // Pomodoro Bedtime Planner Engine
         function calculatePomodoroSchedule() {
             const workMins = getSanitizedInput(workDurationInput, 25);
             const shortBreakMins = getSanitizedInput(shortBreakDurationInput, 5);
@@ -1816,7 +1918,6 @@
             let breakAccumulator = 0;
             let fixedAccumulator = 0;
 
-            // Guard against infinite loop iterations
             let safetyGuard = 0;
 
             while (currentTime < bedtime && safetyGuard < 1000) {
@@ -1837,7 +1938,6 @@
                     continue;
                 }
 
-                // Focus Session
                 let workEnd = new Date(currentTime.getTime() + workMins * 60 * 1000);
                 if (activeFixedEvents.length > 0 && activeFixedEvents[0].startDate < workEnd) {
                     let evt = activeFixedEvents[0];
@@ -1867,7 +1967,6 @@
 
                 if (currentTime >= bedtime) break;
 
-                // Break Session
                 const isLongBreak = (sessionIndex % sessionsPerCycle === 0);
                 const breakLen = isLongBreak ? longBreakMins : shortBreakMins;
                 let breakEnd = new Date(currentTime.getTime() + breakLen * 60 * 1000);
@@ -1889,7 +1988,6 @@
 
             lastCalculatedPomoFocusMins = focusAccumulator;
 
-            // Render Metrics
             const totalScheduledMins = focusAccumulator + breakAccumulator + fixedAccumulator;
             const bufferMins = Math.max(0, availableMins - totalScheduledMins);
 
@@ -1912,7 +2010,6 @@
             }
             bufferTimeText.textContent = `${bufferMins}m buffer`;
 
-            // Bedtime Arrival Summary Text
             const completedSessions = blocks.filter(b => b.type === 'WORK').length;
             bedtimeStatusTitle.textContent = `${completedSessions} Focus Sessions Completed`;
             bedtimeStatusSubtext.textContent = `By bedtime at ${formatTimeShort(bedtime)}, you will have completed ${focusAccumulator} mins of deep focus across ${completedSessions} sessions with ${breakAccumulator} mins of breaks.`;
@@ -1977,7 +2074,6 @@
             });
         }
 
-        // Safe Initialization
         window.addEventListener('DOMContentLoaded', () => {
             if (!loadFromLocalStorage()) {
                 updateFixedEventsUI();

@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuTomator - Productivity Suite & Bedtime Planner</title>
+    <title>AuTomator</title>
 
-    <!-- Tab Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='aeroGrad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23a855f7'/><stop offset='100%' stop-color='%23ec4899'/></linearGradient><linearGradient id='gloss' x1='0%' y1='0%' x2='0%' y2='100%'><stop offset='0%' stop-color='%23ffffff' stop-opacity='0.45'/><stop offset='50%' stop-color='%23ffffff' stop-opacity='0.05'/><stop offset='100%' stop-color='%23000000' stop-opacity='0.25'/></linearGradient></defs><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23aeroGrad)' stroke='%23ffffff' stroke-opacity='0.35' stroke-width='1.5'/><rect x='2' y='2' width='60' height='60' rx='16' fill='url(%23gloss)'/><path d='M20 22h24M20 32h24M20 42h16' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/><circle cx='44' cy='42' r='4' fill='%23ffffff'/></svg>">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDK (v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -173,21 +169,17 @@
 </head>
 <body class="aero-bg flex flex-col min-h-screen text-slate-100 antialiased">
 
-    <!-- Navigation Header -->
+    <!-- Header -->
     <header class="w-full border-b border-white/10 bg-black/40 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30 border border-white/30">
                     <i class="fa-solid fa-clock-rotate-left text-white text-lg"></i>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                        AuTomator <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Dark Frutiger</span>
-                    </h1>
-                </div>
+                <h1 class="text-lg font-bold text-white">AuTomator</h1>
             </div>
 
-            <!-- View Switcher Tabs -->
+            <!-- Navigation Tabs -->
             <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/10">
                 <button id="tabTaskBtn" onclick="switchTab('tasks')" class="aero-btn-active text-xs font-semibold px-3.5 py-1.5 rounded-lg text-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-sliders text-pink-200"></i> Task Allocator
@@ -197,36 +189,29 @@
                 </button>
             </div>
 
-            <!-- User Auth & Quick Actions -->
+            <!-- Actions Bar -->
             <div class="flex items-center space-x-3">
                 <div class="hidden md:flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <strong id="liveClock" class="text-white font-mono">12:00:00 PM</strong>
                 </div>
 
-                <!-- Google Account Bar -->
                 <div id="authContainer" class="flex items-center gap-2">
                     <button id="googleSignInBtn" onclick="signInWithGoogle()" class="aero-btn-secondary text-xs px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-2 text-white">
-                        <i class="fa-brands fa-google text-pink-300"></i> Sign in with Google
+                        <i class="fa-brands fa-google text-pink-300"></i> Sign in
                     </button>
                     <div id="userProfile" class="hidden flex items-center gap-2 bg-black/40 border border-white/15 px-2.5 py-1 rounded-xl">
                         <img id="userAvatar" class="w-6 h-6 rounded-full border border-purple-400/50" src="" alt="User">
                         <span id="userName" class="text-xs font-semibold text-purple-200 max-w-[100px] truncate">User</span>
-                        <span id="syncIndicator" class="text-[10px] text-emerald-400 font-mono" title="Synced to Cloud">● Synced</span>
+                        <span id="syncIndicator" class="text-[10px] text-emerald-400 font-mono">● Synced</span>
                         <button onclick="signOutUser()" class="text-slate-400 hover:text-rose-400 ml-1 text-xs" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></button>
                     </div>
                 </div>
 
                 <div class="hidden lg:flex items-center gap-1">
-                    <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 text-purple-200" title="Undo (Ctrl+Z)">
-                        <i class="fa-solid fa-rotate-left text-purple-300"></i>
-                    </button>
-                    <button id="redoBtn" onclick="redo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 text-purple-200" title="Redo (Ctrl+Y)">
-                        <i class="fa-solid fa-rotate-right text-purple-300"></i>
-                    </button>
-                    <button id="loadSampleBtn" onclick="loadSampleData()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
-                        <i class="fa-solid fa-list-check text-purple-300"></i> Sample
-                    </button>
+                    <button id="undoBtn" onclick="undo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium text-purple-200" title="Undo (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button id="redoBtn" onclick="redo()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium text-purple-200" title="Redo (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button id="loadSampleBtn" onclick="loadSampleData()" class="aero-btn-secondary text-xs px-2.5 py-1.5 rounded-lg font-medium">Sample</button>
                 </div>
             </div>
         </div>
@@ -241,29 +226,23 @@
     <!-- Main Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- TAB 1: TASK ALLOCATOR & MASTER TIMELINE ENGINE -->
+        <!-- TAB 1: TASK ALLOCATOR -->
         <div id="taskAllocatorTab" class="space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Left Panel: Fixed Routine Constraints -->
+                <!-- Fixed Schedule Panel -->
                 <div class="lg:col-span-6 aero-card p-5 space-y-4 flex flex-col justify-between">
                     <div class="space-y-4">
                         <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
-                            <div>
-                                <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
-                                    <i class="fa-solid fa-calendar-day text-amber-300"></i> Fixed Schedule Constraints
-                                </h2>
-                                <p class="text-xs text-slate-400 mt-0.5">Fixed events (Bedtime, Meetings, Dinner) tasks slot around.</p>
-                            </div>
+                            <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-day text-amber-300"></i> Fixed Constraints
+                            </h2>
                             <span class="pill-badge badge-amber"><i class="fa-solid fa-lock text-[10px] text-white"></i> Fixed Events</span>
                         </div>
 
-                        <!-- Start Work Time & Bedtime -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-play text-emerald-400"></i> Start Work Time
-                                </label>
+                                <label class="text-xs font-semibold text-slate-300">Start Work Time</label>
                                 <label class="flex items-center gap-1.5 cursor-pointer text-xs text-emerald-300 font-medium">
                                     <input type="checkbox" id="autoStartToggle" checked class="w-3.5 h-3.5 rounded bg-black/40 border-white/20 text-purple-500 focus:ring-purple-500 cursor-pointer">
                                     <span>Auto Start (Now)</span>
@@ -271,30 +250,19 @@
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div class="space-y-1">
-                                    <input type="time" id="startTimeInput" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-emerald-300">
-                                </div>
-                                <div class="space-y-1">
-                                    <input type="time" id="bedtimeInput" value="23:00" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-purple-300" title="Target Bedtime">
-                                </div>
+                                <input type="time" id="startTimeInput" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-emerald-300">
+                                <input type="time" id="bedtimeInput" value="23:00" class="aero-input w-full px-3 py-2 rounded-xl text-sm font-mono text-purple-300" title="Target Bedtime">
                             </div>
                         </div>
 
-                        <!-- Add Fixed Event -->
                         <div class="space-y-2 pt-3 border-t border-white/10">
-                            <label class="text-xs font-semibold text-slate-300 block">Add Fixed Event / Routine Block</label>
+                            <label class="text-xs font-semibold text-slate-300 block">Add Fixed Event</label>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                                <input type="text" id="eventTitleInput" placeholder="Event Name (e.g. Dinner, Class)" class="sm:col-span-5 aero-input px-3 py-2 rounded-lg text-xs">
-                                <div class="sm:col-span-3 flex items-center gap-1">
-                                    <input type="time" id="eventStartTimeInput" class="aero-input w-full px-2 py-2 rounded-lg text-xs font-mono text-amber-200" title="Start Time">
-                                </div>
-                                <div class="sm:col-span-3 flex items-center gap-1">
-                                    <input type="time" id="eventEndTimeInput" class="aero-input w-full px-2 py-2 rounded-lg text-xs font-mono text-amber-200" title="End Time">
-                                </div>
-                                <button id="addEventBtn" class="sm:col-span-1 aero-btn py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center" title="Add Fixed Event">
-                                    <i class="fa-solid fa-plus text-white"></i>
-                                </button>
+                                <input type="text" id="eventTitleInput" placeholder="Event Name" class="sm:col-span-5 aero-input px-3 py-2 rounded-lg text-xs">
+                                <input type="time" id="eventStartTimeInput" class="sm:col-span-3 aero-input px-2 py-2 rounded-lg text-xs font-mono text-amber-200">
+                                <input type="time" id="eventEndTimeInput" class="sm:col-span-3 aero-input px-2 py-2 rounded-lg text-xs font-mono text-amber-200">
+                                <button id="addEventBtn" class="sm:col-span-1 aero-btn py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center"><i class="fa-solid fa-plus"></i></button>
                             </div>
                         </div>
 
@@ -303,78 +271,64 @@
 
                     <div class="bg-black/30 border border-white/10 rounded-xl p-3 flex items-center justify-between">
                         <div>
-                            <div class="text-[11px] text-slate-400 font-medium">Calculated Free Work Time Window</div>
-                            <div id="calculatedWorkTimeText" class="text-xs text-amber-300 font-semibold mt-0.5">0 hours 0 mins available</div>
+                            <div class="text-[11px] text-slate-400 font-medium">Available Work Window</div>
+                            <div id="calculatedWorkTimeText" class="text-xs text-amber-300 font-semibold mt-0.5">0 hours 0 mins</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Panel: Task Allocation Input -->
+                <!-- Task Allocator Panel -->
                 <div class="lg:col-span-6 aero-card p-5 space-y-4 flex flex-col justify-between">
                     <div class="space-y-4">
                         <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
-                            <div>
-                                <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
-                                    <i class="fa-solid fa-sliders text-pink-400"></i> Task Allocator Engine
-                                </h2>
-                                <p class="text-xs text-slate-400 mt-0.5">Top tasks prioritized for longer duration on equal rating ties.</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="syncPomoFocusBtn" onclick="syncPomoFocusToAllocator()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-lg text-pink-300 transition flex items-center gap-1" title="Use calculated Pomodoro focus time as target">
-                                    <i class="fa-solid fa-stopwatch text-purple-300"></i> Use Pomo Focus
-                                </button>
-                                <span class="pill-badge badge-purple"><i class="fa-solid fa-wand-magic-sparkles text-[10px] text-white"></i> Proportional</span>
-                            </div>
+                            <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-pink-400"></i> Allocator Engine
+                            </h2>
+                            <button id="syncPomoFocusBtn" onclick="syncPomoFocusToAllocator()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-lg text-pink-300 flex items-center gap-1">
+                                <i class="fa-solid fa-stopwatch text-purple-300"></i> Use Pomo Focus
+                            </button>
                         </div>
 
                         <div class="space-y-1.5">
                             <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                                <span class="text-pink-300 flex items-center gap-1.5">Total Work Duration to Allocate</span>
-                                <span class="text-slate-400 text-[11px]">Minutes</span>
+                                <span class="text-pink-300">Total Work Duration (Mins)</span>
                             </label>
                             <div class="relative flex items-center">
-                                <input type="number" id="totalDurationInput" min="1" max="1440" value="205" placeholder="e.g. 205" class="aero-input w-full pl-4 pr-11 py-2.5 rounded-xl text-lg font-bold text-pink-200 tracking-wider">
-                                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-pink-300 text-base pointer-events-none flex items-center justify-center">
-                                    <i class="fa-solid fa-clock"></i>
-                                </div>
+                                <input type="number" id="totalDurationInput" min="1" max="1440" value="205" class="aero-input w-full pl-4 pr-11 py-2.5 rounded-xl text-lg font-bold text-pink-200 tracking-wider">
+                                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 text-pink-300 text-base pointer-events-none"><i class="fa-solid fa-clock"></i></div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between text-xs pt-1">
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[11px] text-slate-400 font-medium">Quick Presets:</span>
-                                <button onclick="setQuickDuration(60)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">60m</button>
-                                <button onclick="setQuickDuration(120)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">120m</button>
-                                <button onclick="setQuickDuration(205)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">205m</button>
-                                <button onclick="setQuickDuration(300)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">300m</button>
-                            </div>
+                        <div class="flex items-center gap-1.5 text-xs pt-1">
+                            <span class="text-[11px] text-slate-400 font-medium">Presets:</span>
+                            <button onclick="setQuickDuration(60)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">60m</button>
+                            <button onclick="setQuickDuration(120)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">120m</button>
+                            <button onclick="setQuickDuration(205)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">205m</button>
+                            <button onclick="setQuickDuration(300)" class="aero-btn-secondary text-[11px] px-2 py-0.5 rounded text-purple-200">300m</button>
                         </div>
 
                         <div class="space-y-3 pt-3 border-t border-white/10">
-                            <label class="text-xs font-semibold text-slate-300 block">Add Task Item</label>
+                            <label class="text-xs font-semibold text-slate-300 block">Add Task</label>
                             <div class="space-y-2">
-                                <input type="text" id="taskTitleInput" placeholder="Task Title (e.g. Lang - Lewis, Titration...)" class="aero-input w-full px-3 py-2 rounded-lg text-xs">
+                                <input type="text" id="taskTitleInput" placeholder="Task Title" class="aero-input w-full px-3 py-2 rounded-lg text-xs">
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <div class="space-y-1 sm:col-span-2">
-                                        <label class="text-[11px] text-slate-400 font-medium">Length Rating</label>
+                                    <div class="sm:col-span-2">
                                         <select id="taskRatingSelect" class="aero-input w-full px-3 py-2 rounded-lg text-xs font-medium">
-                                            <option value="1">1 - Short (1x Weight)</option>
-                                            <option value="2" selected>2 - Medium (2x Weight)</option>
-                                            <option value="3">3 - Long (3x Weight)</option>
+                                            <option value="1">1 - Short (1x)</option>
+                                            <option value="2" selected>2 - Medium (2x)</option>
+                                            <option value="3">3 - Long (3x)</option>
                                         </select>
                                     </div>
-                                    <div class="flex items-end sm:col-span-1">
-                                        <button id="addTaskBtn" class="aero-btn w-full py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center gap-1.5">
-                                            <i class="fa-solid fa-plus text-white"></i> Add Task
-                                        </button>
-                                    </div>
+                                    <button id="addTaskBtn" class="sm:col-span-1 aero-btn w-full py-2 rounded-lg text-white font-bold text-xs flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-plus"></i> Add
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <button id="calculateBtn" onclick="calculateAndRender()" class="aero-btn w-full py-3 rounded-xl text-white font-extrabold text-sm tracking-wide flex items-center justify-center gap-2 mt-4 shadow-lg shadow-purple-900/40">
-                        <i class="fa-solid fa-rotate text-xs text-purple-200"></i> Recalculate Schedule & Allocations
+                        <i class="fa-solid fa-rotate text-xs text-purple-200"></i> Recalculate
                     </button>
                 </div>
             </div>
@@ -383,14 +337,10 @@
             <div class="aero-card p-6 relative overflow-hidden">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="pill-badge badge-purple"><i class="fa-solid fa-equals text-white"></i> EXACT SUM ENGINE</span>
-                            <span id="matchStatusBadge" class="pill-badge badge-green"><i class="fa-solid fa-circle-check text-emerald-950"></i> EXACT MATCH</span>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Total Target vs Allocated</div>
+                        <span id="matchStatusBadge" class="pill-badge badge-green mb-2"><i class="fa-solid fa-circle-check text-emerald-950"></i> EXACT MATCH</span>
+                        <div class="space-y-1 mt-1">
+                            <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Target vs Allocated</div>
                             <h2 id="sumDisplay" class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white font-mono">0 / 205 mins</h2>
-                            <p id="calculationSummarySubtext" class="text-xs text-slate-300 pt-1 leading-relaxed">Top tasks automatically prioritized for rounding additions when length ratings are tied.</p>
                         </div>
                     </div>
 
@@ -408,7 +358,7 @@
                             <div id="metricBaseUnit" class="text-base font-bold text-emerald-400 font-mono mt-0.5">0m</div>
                         </div>
                         <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
-                            <div class="text-[11px] text-slate-400 font-medium">Rounding Delta</div>
+                            <div class="text-[11px] text-slate-400 font-medium">Delta</div>
                             <div id="metricDelta" class="text-base font-bold text-pink-400 font-mono mt-0.5">0m</div>
                         </div>
                     </div>
@@ -416,27 +366,21 @@
 
                 <div class="mt-5 pt-4 border-t border-white/10 space-y-2">
                     <div class="flex items-center justify-between text-xs font-semibold">
-                        <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-column text-pink-300"></i> Master Schedule Block Distribution</span>
+                        <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-column text-pink-300"></i> Schedule Distribution</span>
                         <span id="completionProgressText" class="text-slate-400 font-mono">0 / 0 Completed</span>
                     </div>
                     <div id="stackedAllocationBar" class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5"></div>
-                    <div class="flex items-center justify-between pt-1">
-                        <div class="text-[11px] text-slate-400 flex items-center gap-1">Top-to-bottom priority tie-breaking active <i class="fa-solid fa-check text-emerald-400 ml-0.5"></i></div>
-                        <div class="flex items-center gap-2">
-                            <button id="copyListBtn" onclick="copyScheduleText()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy Schedule</button>
-                            <button id="exportTxtBtn" onclick="exportScheduleTxt()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200 transition"><i class="fa-solid fa-download text-pink-300 mr-1"></i> Export TXT</button>
-                        </div>
+                    <div class="flex items-center justify-end gap-2 pt-1">
+                        <button id="copyListBtn" onclick="copyScheduleText()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200"><i class="fa-solid fa-copy text-purple-300 mr-1"></i> Copy</button>
+                        <button id="exportTxtBtn" onclick="exportScheduleTxt()" class="aero-btn-secondary text-xs px-2.5 py-1 rounded-md font-medium text-slate-200"><i class="fa-solid fa-download text-pink-300 mr-1"></i> Export TXT</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Master Chronological Timeline Container -->
+            <!-- Timeline Container -->
             <div class="aero-card p-5 space-y-4">
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Master Timeline & Task Schedule</h3>
-                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Toggle inclusion using the eye icon.</p>
-                    </div>
+                    <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Timeline</h3>
                     <span id="activeCountBadge" class="pill-badge badge-blue">0 Items</span>
                 </div>
                 <div id="masterTimelineContainer" class="space-y-3 min-h-[160px]"></div>
@@ -451,47 +395,34 @@
                     <div>
                         <div class="aero-card-header -mx-5 -mt-5 p-4 mb-4 flex items-center justify-between">
                             <h2 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2">
-                                <i class="fa-solid fa-sliders text-purple-400"></i> Pomodoro Configuration
+                                <i class="fa-solid fa-sliders text-purple-400"></i> Configuration
                             </h2>
-                            <span class="pill-badge badge-purple"><i class="fa-solid fa-gear text-[10px]"></i> Presets</span>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                                    <span>Work Duration</span><span class="text-purple-400 text-[11px]">mins</span>
+                                    <span>Work</span><span class="text-purple-400 text-[11px]">mins</span>
                                 </label>
-                                <div class="relative">
-                                    <input type="number" id="workDuration" min="1" max="180" value="25" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
-                                    <i class="fa-solid fa-briefcase absolute right-3 top-2.5 text-slate-500 text-xs"></i>
-                                </div>
+                                <input type="number" id="workDuration" min="1" max="180" value="25" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
                                     <span>Short Break</span><span class="text-emerald-400 text-[11px]">mins</span>
                                 </label>
-                                <div class="relative">
-                                    <input type="number" id="shortBreakDuration" min="1" max="60" value="5" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
-                                    <i class="fa-solid fa-mug-hot absolute right-3 top-2.5 text-slate-500 text-xs"></i>
-                                </div>
+                                <input type="number" id="shortBreakDuration" min="1" max="60" value="5" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
                                     <span>Long Break</span><span class="text-blue-400 text-[11px]">mins</span>
                                 </label>
-                                <div class="relative">
-                                    <input type="number" id="longBreakDuration" min="1" max="120" value="15" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
-                                    <i class="fa-solid fa-couch absolute right-3 top-2.5 text-slate-500 text-xs"></i>
-                                </div>
+                                <input type="number" id="longBreakDuration" min="1" max="120" value="15" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
                             </div>
                             <div class="space-y-1.5">
                                 <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                                    <span>Long Break Interval</span><span class="text-amber-400 text-[11px]">sessions</span>
+                                    <span>Interval</span><span class="text-amber-400 text-[11px]">sessions</span>
                                 </label>
-                                <div class="relative">
-                                    <input type="number" id="sessionsPerCycle" min="1" max="12" value="4" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
-                                    <i class="fa-solid fa-repeat absolute right-3 top-2.5 text-slate-500 text-xs"></i>
-                                </div>
+                                <input type="number" id="sessionsPerCycle" min="1" max="12" value="4" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-medium">
                             </div>
                         </div>
 
@@ -499,15 +430,13 @@
 
                         <div class="space-y-4">
                             <div class="space-y-1.5">
-                                <label class="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                                    <span class="text-pink-300 flex items-center gap-1.5"><i class="fa-solid fa-bed"></i> Target Bedtime</span>
-                                </label>
+                                <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-bed"></i> Target Bedtime</label>
                                 <input type="time" id="pomoBedTimeInput" value="23:00" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-semibold tracking-wider text-pink-200">
                             </div>
 
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
-                                    <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock"></i> Start Time Mode</label>
+                                    <label class="text-xs font-semibold text-slate-300">Start Time</label>
                                     <span id="timeSyncStatus" class="text-[10px] text-emerald-400 font-mono">● LIVE SYNC</span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-xl border border-white/10">
@@ -515,19 +444,15 @@
                                     <button id="modeCustomBtn" onclick="setPomoStartMode(false)" class="py-1.5 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition"><i class="fa-solid fa-pen text-[10px] mr-1"></i> Custom</button>
                                 </div>
                                 <div id="customStartTimeWrapper" class="hidden pt-1">
-                                    <label class="text-[11px] font-medium text-slate-400 mb-1 block">Specify Custom Start Time:</label>
                                     <input type="time" id="customStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-semibold tracking-wider text-purple-200">
                                 </div>
                             </div>
 
                             <div class="pt-3 border-t border-white/10">
                                 <label class="flex items-center justify-between cursor-pointer">
-                                    <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5">
-                                        <i class="fa-solid fa-link"></i> Integrate Task Allocator Fixed Events
-                                    </span>
+                                    <span class="text-xs font-semibold text-amber-300 flex items-center gap-1.5"><i class="fa-solid fa-link"></i> Integrate Fixed Events</span>
                                     <input type="checkbox" id="integrateFixedEventsToggle" checked class="w-4 h-4 rounded bg-black/40 border-white/20 text-purple-500 focus:ring-purple-500 cursor-pointer">
                                 </label>
-                                <p class="text-[11px] text-slate-400 mt-1">When checked, fixed events from Task Allocator automatically pause/push Pomodoro sessions.</p>
                             </div>
                         </div>
                     </div>
@@ -541,13 +466,12 @@
                     <div class="aero-card p-6 relative overflow-hidden flex-1 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-4">
-                                <span class="pill-badge badge-purple"><i class="fa-solid fa-moon"></i> BEDTIME ARRIVAL STATE</span>
+                                <span class="pill-badge badge-purple"><i class="fa-solid fa-moon"></i> BEDTIME ARRIVAL</span>
                                 <span id="effectiveStartTimeTag" class="text-xs font-mono text-slate-400 bg-white/5 px-2.5 py-1 rounded-md border border-white/10">Starts: 00:00</span>
                             </div>
                             <div class="space-y-2">
-                                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Status at Bedtime</div>
-                                <h2 id="bedtimeStatusTitle" class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white">Calculating cycle...</h2>
-                                <p id="bedtimeStatusSubtext" class="text-sm text-slate-300 leading-relaxed">Enter your preferred Pomodoro times and target bedtime to compute your schedule.</p>
+                                <h2 id="bedtimeStatusTitle" class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-white">Calculating...</h2>
+                                <p id="bedtimeStatusSubtext" class="text-sm text-slate-300 leading-relaxed"></p>
                             </div>
                         </div>
 
@@ -573,7 +497,7 @@
 
                     <div class="aero-card p-5 space-y-3">
                         <div class="flex items-center justify-between text-xs font-semibold">
-                            <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-pink-400"></i> Time Distribution Breakdown</span>
+                            <span class="text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-chart-pie text-pink-400"></i> Breakdown</span>
                             <span id="timeUtilizationRatio" class="text-slate-400 font-mono">0% Productive</span>
                         </div>
                         <div class="w-full h-4 bg-black/50 rounded-full overflow-hidden flex border border-white/10 p-0.5">
@@ -586,7 +510,7 @@
                             <div class="flex items-center gap-3 flex-wrap">
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Focus</span>
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Breaks</span>
-                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Fixed Events</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Fixed</span>
                                 <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block"></span> Buffer</span>
                             </div>
                             <div id="bufferTimeText" class="font-mono text-amber-300 font-medium">0m buffer</div>
@@ -597,17 +521,12 @@
 
             <div class="aero-card p-5 space-y-4">
                 <div class="aero-card-header -mx-5 -mt-5 p-4 mb-2 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-pink-400"></i> Chronological Session Bar</h3>
-                        <p class="text-xs text-slate-400">Continuous breakdown of every Pomodoro and fixed event block up to bedtime.</p>
-                    </div>
-                    <span class="pill-badge badge-yellow"><i class="fa-solid fa-bolt text-[10px]"></i> Visual Timeline</span>
+                    <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-timeline text-pink-400"></i> Visual Timeline</h3>
                 </div>
                 <div class="space-y-2">
                     <div id="pomoTimelineContainer" class="w-full h-10 bg-black/60 rounded-xl border border-white/10 flex overflow-hidden p-1 gap-0.5 relative"></div>
                     <div class="flex justify-between text-[11px] font-mono text-slate-400 px-1">
                         <span id="pomoTimelineStartLabel">--:--</span>
-                        <span id="pomoTimelineMidLabel" class="hidden sm:inline-block">Midpoint</span>
                         <span id="pomoTimelineEndLabel" class="text-pink-300 font-bold">--:-- Bedtime</span>
                     </div>
                 </div>
@@ -615,7 +534,7 @@
 
             <div class="aero-card p-5 space-y-4">
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
-                    <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-emerald-400"></i> Step-by-Step Session Plan</h3>
+                    <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-list-check text-emerald-400"></i> Session Plan</h3>
                     <span id="pomoTotalBlockCountBadge" class="pill-badge badge-blue">0 Blocks</span>
                 </div>
                 <div id="pomoBlocksList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-96 overflow-y-auto pr-1"></div>
@@ -655,7 +574,7 @@
 
                 <div id="taskFields" class="space-y-3 hidden">
                     <div class="space-y-1">
-                        <label class="text-xs font-semibold text-slate-300">Length Rating (Proportional Mode)</label>
+                        <label class="text-xs font-semibold text-slate-300">Length Rating</label>
                         <select id="editModalRatingSelect" class="aero-input w-full px-3 py-2 rounded-lg text-xs font-medium">
                             <option value="1">1 - Short (1x Weight)</option>
                             <option value="2">2 - Medium (2x Weight)</option>
@@ -665,14 +584,13 @@
 
                     <div class="space-y-3 pt-3 border-t border-white/10">
                         <div class="flex items-center justify-between">
-                            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock text-teal-300"></i> Fixed Task Timing / Duration</label>
+                            <label class="text-xs font-semibold text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-clock text-teal-300"></i> Fixed Task Timing</label>
                             <button type="button" onclick="clearTaskFixedTimes()" class="text-[11px] text-teal-400 hover:text-teal-200 underline font-medium">Reset to Auto</button>
                         </div>
 
                         <div class="space-y-1 bg-black/30 p-2.5 rounded-lg border border-white/10">
                             <label class="text-[11px] text-teal-200 font-semibold flex items-center justify-between">
-                                <span>Fixed Duration (Minutes)</span>
-                                <span class="text-[10px] text-slate-400">Draggable on timeline</span>
+                                <span>Fixed Duration (Mins)</span>
                             </label>
                             <input type="number" id="editModalTaskDurationInput" min="1" max="1440" placeholder="e.g. 45" class="aero-input w-full px-3 py-1.5 rounded-lg text-xs font-mono text-teal-200">
                         </div>
@@ -680,17 +598,11 @@
                         <div class="text-center text-[10px] text-slate-500 uppercase tracking-wider font-bold">OR Specific Range</div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="space-y-1">
-                                <label class="text-[11px] text-slate-400 font-medium">Start Time</label>
-                                <input type="time" id="editModalTaskStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[11px] text-slate-400 font-medium">End Time</label>
-                                <input type="time" id="editModalTaskEndTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
-                            </div>
+                            <input type="time" id="editModalTaskStartTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
+                            <input type="time" id="editModalTaskEndTimeInput" class="aero-input w-full px-3 py-2 rounded-lg text-sm font-mono text-teal-300">
                         </div>
                         <div id="taskDurationPreview" class="text-xs font-mono text-slate-400 bg-black/40 border border-white/10 rounded-lg p-2 text-center transition">
-                            Duration: Auto (Proportional based on weight)
+                            Duration: Auto
                         </div>
                     </div>
                 </div>
@@ -698,21 +610,18 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
                 <button onclick="closeEditModal()" class="aero-btn-secondary px-4 py-2 rounded-lg text-xs font-semibold text-slate-300">Cancel</button>
-                <button onclick="saveEditModal()" class="aero-btn px-4 py-2 rounded-lg text-xs font-bold text-white">Save Changes</button>
+                <button onclick="saveEditModal()" class="aero-btn px-4 py-2 rounded-lg text-xs font-bold text-white">Save</button>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="w-full border-t border-white/10 bg-black/40 py-4 text-center text-xs text-slate-500">
-        AuTomator &bull; Integrated Task Allocator & Pomodoro Bedtime Engine
+        AuTomator
     </footer>
 
-    <!-- Application Script -->
+    <!-- Script -->
     <script>
-        // ==========================================
-        // FIREBASE AUTHENTICATION & CLOUD SYNC CONFIG
-        // ==========================================
         const firebaseConfig = {
             apiKey: "YOUR_FIREBASE_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -748,36 +657,25 @@
                 });
             }
         } catch (e) {
-            console.warn("Firebase not configured or script failed to load", e);
+            console.warn("Firebase not configured", e);
         }
 
         function signInWithGoogle() {
-            if (!auth) {
-                alert("Please add your Firebase Configuration to index.html to enable Google Sign-In!");
-                return;
-            }
+            if (!auth) return alert("Add Firebase configuration to enable sign-in.");
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).then((result) => {
                 showUndoToast(`Welcome, ${result.user.displayName}`, "fa-user-check");
-            }).catch((error) => {
-                console.error("Sign-in failed", error);
-                alert("Google Sign-In failed: " + error.message);
-            });
+            }).catch((error) => alert("Sign-in failed: " + error.message));
         }
 
         function signOutUser() {
-            if (auth) {
-                auth.signOut().then(() => {
-                    showUndoToast("Signed Out", "fa-right-from-bracket");
-                });
-            }
+            if (auth) auth.signOut().then(() => showUndoToast("Signed Out", "fa-right-from-bracket"));
         }
 
         function saveToCloud() {
             if (!currentUser || !db) return;
             const state = {
-                tasks,
-                fixedEvents,
+                tasks, fixedEvents,
                 totalDuration: totalDurationInput.value,
                 bedtime: bedtimeInput.value,
                 startTime: startTimeInput.value,
@@ -793,25 +691,11 @@
             };
 
             const syncIndicator = document.getElementById('syncIndicator');
-            if (syncIndicator) {
-                syncIndicator.textContent = "● Syncing...";
-                syncIndicator.className = "text-[10px] text-amber-400 font-mono";
-            }
+            if (syncIndicator) syncIndicator.textContent = "● Syncing...";
 
             db.collection('user_schedules').doc(currentUser.uid).set(state, { merge: true })
-                .then(() => {
-                    if (syncIndicator) {
-                        syncIndicator.textContent = "● Synced";
-                        syncIndicator.className = "text-[10px] text-emerald-400 font-mono";
-                    }
-                })
-                .catch((err) => {
-                    console.error("Error saving to cloud", err);
-                    if (syncIndicator) {
-                        syncIndicator.textContent = "○ Sync Error";
-                        syncIndicator.className = "text-[10px] text-rose-400 font-mono";
-                    }
-                });
+                .then(() => { if (syncIndicator) syncIndicator.textContent = "● Synced"; })
+                .catch(() => { if (syncIndicator) syncIndicator.textContent = "○ Sync Error"; });
         }
 
         function loadFromCloud() {
@@ -819,9 +703,7 @@
             db.collection('user_schedules').doc(currentUser.uid).get().then((doc) => {
                 if (doc.exists) {
                     const state = doc.data();
-                    if (state.tasks) {
-                        tasks = state.tasks.map(t => ({ included: true, ...t }));
-                    }
+                    if (state.tasks) tasks = state.tasks.map(t => ({ included: true, ...t }));
                     if (state.fixedEvents) fixedEvents = state.fixedEvents;
                     if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
                     if (state.bedtime !== undefined) {
@@ -846,9 +728,6 @@
             });
         }
 
-        // ==========================================
-        // CORE APPLICATION LOGIC
-        // ==========================================
         const STORAGE_KEY = 'automator_app_state_v1';
 
         function escapeHtml(str) {
@@ -1002,7 +881,6 @@
         let lastCalculatedPomoFocusMins = 0;
         let dragSourceIndex = null;
 
-        // Auto-scroll state during drag operations
         let dragY = 0;
         let autoScrollFrame = null;
         let isDragging = false;
@@ -1046,8 +924,7 @@
 
         function saveToLocalStorage() {
             const state = {
-                tasks,
-                fixedEvents,
+                tasks, fixedEvents,
                 totalDuration: totalDurationInput.value,
                 bedtime: bedtimeInput.value,
                 startTime: startTimeInput.value,
@@ -1069,9 +946,7 @@
             if (!data) return false;
             try {
                 const state = JSON.parse(data);
-                if (state.tasks) {
-                    tasks = state.tasks.map(t => ({ included: true, ...t }));
-                }
+                if (state.tasks) tasks = state.tasks.map(t => ({ included: true, ...t }));
                 if (state.fixedEvents) fixedEvents = state.fixedEvents;
                 if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
                 if (state.bedtime !== undefined) {
@@ -1089,15 +964,13 @@
                 if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
                 return true;
             } catch (e) {
-                console.error("Failed to load saved state", e);
                 return false;
             }
         }
 
         function getCurrentStateSnapshot() {
             return JSON.stringify({
-                tasks: tasks,
-                fixedEvents: fixedEvents,
+                tasks, fixedEvents,
                 totalDuration: totalDurationInput.value,
                 bedtime: bedtimeInput.value,
                 workDuration: workDurationInput.value,
@@ -1138,16 +1011,14 @@
         function undo() {
             if (undoStack.length === 0) return;
             redoStack.push(getCurrentStateSnapshot());
-            const previousStateStr = undoStack.pop();
-            restoreStateFromSnapshot(previousStateStr);
+            restoreStateFromSnapshot(undoStack.pop());
             showUndoToast("Action Undone", "fa-rotate-left");
         }
 
         function redo() {
             if (redoStack.length === 0) return;
             undoStack.push(getCurrentStateSnapshot());
-            const nextStateStr = redoStack.pop();
-            restoreStateFromSnapshot(nextStateStr);
+            restoreStateFromSnapshot(redoStack.pop());
             showUndoToast("Action Redone", "fa-rotate-right");
         }
 
@@ -1156,8 +1027,7 @@
             if (e.ctrlKey || e.metaKey) {
                 if (e.key.toLowerCase() === 'z') {
                     e.preventDefault();
-                    if (e.shiftKey) redo();
-                    else undo();
+                    if (e.shiftKey) redo(); else undo();
                 } else if (e.key.toLowerCase() === 'y') {
                     e.preventDefault();
                     redo();
@@ -1171,16 +1041,12 @@
             const toastIcon = document.getElementById('toastIcon');
             if (toastIcon) toastIcon.className = `fa-solid ${iconClass} text-pink-300`;
             toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
-            }, 2000);
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3'), 2000);
         }
 
         function getCurrentTimeStr() {
             const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            return `${h}:${m}`;
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         }
 
         function formatTime12H(date) {
@@ -1203,8 +1069,7 @@
         }
 
         setInterval(() => {
-            const now = new Date();
-            liveClock.textContent = formatTime12H(now);
+            liveClock.textContent = formatTime12H(new Date());
 
             if (autoStartToggle.checked) {
                 const nowStr = getCurrentTimeStr();
@@ -1213,9 +1078,7 @@
                     calculateAndRender();
                 }
             }
-            if (isLivePomoMode) {
-                calculatePomodoroSchedule();
-            }
+            if (isLivePomoMode) calculatePomodoroSchedule();
         }, 1000);
 
         function getSanitizedInput(inputElement, defaultValue = 0) {
@@ -1275,20 +1138,6 @@
             showUndoToast("Sample Data Loaded", "fa-list-check");
         }
 
-        function resetAllData() {
-            if (confirm("Are you sure you want to reset all tasks and fixed events?")) {
-                pushState();
-                tasks = [];
-                fixedEvents = [];
-                totalDurationInput.value = 0;
-                updateFixedEventsUI();
-                calculateAndRender();
-                calculatePomodoroSchedule();
-                saveToLocalStorage();
-                showUndoToast("Data Reset", "fa-trash-can");
-            }
-        }
-
         autoStartToggle.addEventListener('change', () => {
             syncAutoStartTime();
             calculateAndRender();
@@ -1310,10 +1159,7 @@
 
             if (!startVal || !endVal) return;
             const duration = calculateDurationFromTimes(startVal, endVal);
-            if (duration <= 0) {
-                alert("End time must be after start time.");
-                return;
-            }
+            if (duration <= 0) return alert("End time must be after start time.");
 
             pushState();
             fixedEvents.push({ id: Date.now(), title, startTime: startVal, endTime: endVal, duration, isFixed: true });
@@ -1344,8 +1190,8 @@
                             <span class="font-mono text-slate-300 flex items-center gap-1">
                                 <i class="fa-regular fa-clock text-amber-300"></i> ${evt.startTime} - ${evt.endTime} (${dur}m)
                             </span>
-                            <button onclick="openEditModal(${evt.id}, 'FIXED')" class="text-slate-400 hover:text-purple-300 transition" title="Edit Event Times"><i class="fa-solid fa-pen text-xs"></i></button>
-                            <button onclick="removeFixedEvent(${evt.id})" class="text-slate-500 hover:text-rose-400 transition ml-1" title="Delete"><i class="fa-solid fa-xmark text-sm text-slate-400 hover:text-rose-400"></i></button>
+                            <button onclick="openEditModal(${evt.id}, 'FIXED')" class="text-slate-400 hover:text-purple-300 transition"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="removeFixedEvent(${evt.id})" class="text-slate-500 hover:text-rose-400 transition ml-1"><i class="fa-solid fa-xmark text-sm"></i></button>
                         </div>
                     `;
                     fixedEventsContainer.appendChild(row);
@@ -1376,9 +1222,7 @@
             let fixedMins = fixedEvents.reduce((acc, e) => acc + (e.duration || calculateDurationFromTimes(e.startTime, e.endTime)), 0);
             let netWorkMins = Math.max(0, totalSpanMins - fixedMins);
 
-            const hours = Math.floor(netWorkMins / 60);
-            const mins = netWorkMins % 60;
-            calculatedWorkTimeText.textContent = `${hours}h ${mins}m available focus time (excl. ${fixedMins}m fixed blocks)`;
+            calculatedWorkTimeText.textContent = `${Math.floor(netWorkMins / 60)}h ${netWorkMins % 60}m available (${fixedMins}m fixed)`;
             return netWorkMins;
         }
 
@@ -1390,13 +1234,9 @@
             pushState();
             tasks.push({
                 id: Date.now(),
-                title: title,
-                rating: Math.max(1, Math.min(3, rating)),
-                completed: false,
-                included: true,
-                fixedDuration: null,
-                fixedStartTime: null,
-                fixedEndTime: null
+                title, rating: Math.max(1, Math.min(3, rating)),
+                completed: false, included: true,
+                fixedDuration: null, fixedStartTime: null, fixedEndTime: null
             });
             taskTitleInput.value = '';
             calculateAndRender();
@@ -1434,7 +1274,7 @@
             } else {
                 const task = tasks.find(t => t.id === id);
                 if (!task) return;
-                editModalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-pink-400"></i> Edit Task Item`;
+                editModalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-pink-400"></i> Edit Task`;
                 editModalTitleInput.value = task.title;
                 editModalRatingSelect.value = task.rating || 2;
                 editModalTaskDurationInput.value = task.fixedDuration || '';
@@ -1459,17 +1299,17 @@
             if (startVal && endVal) {
                 const dur = calculateDurationFromTimes(startVal, endVal);
                 if (dur > 0) {
-                    taskDurationPreview.textContent = `Calculated Specific Range: ${dur} mins (${startVal} - ${endVal})`;
+                    taskDurationPreview.textContent = `Range: ${dur} mins (${startVal} - ${endVal})`;
                     taskDurationPreview.className = "text-xs font-mono text-teal-300 bg-teal-950/60 border border-teal-500/40 rounded-lg p-2 text-center font-bold";
                 } else {
-                    taskDurationPreview.textContent = "Invalid range: End time must be after start time";
+                    taskDurationPreview.textContent = "Invalid range";
                     taskDurationPreview.className = "text-xs font-mono text-rose-300 bg-rose-950/60 border border-rose-500/40 rounded-lg p-2 text-center font-bold";
                 }
             } else if (!isNaN(durVal) && durVal > 0) {
-                taskDurationPreview.textContent = `Fixed Standalone Duration: ${durVal} mins (Draggable card position)`;
+                taskDurationPreview.textContent = `Fixed Duration: ${durVal} mins`;
                 taskDurationPreview.className = "text-xs font-mono text-teal-300 bg-teal-950/60 border border-teal-500/40 rounded-lg p-2 text-center font-bold";
             } else {
-                taskDurationPreview.textContent = "Duration: Auto (Proportional based on weight)";
+                taskDurationPreview.textContent = "Duration: Auto";
                 taskDurationPreview.className = "text-xs font-mono text-slate-400 bg-black/40 border border-white/10 rounded-lg p-2 text-center";
             }
         }
@@ -1558,7 +1398,7 @@
                 saveToLocalStorage();
                 showUndoToast(`Synced ${lastCalculatedPomoFocusMins}m Focus Time`, "fa-stopwatch");
             } else {
-                alert("Please calculate a valid Pomodoro schedule first.");
+                alert("Calculate a Pomodoro schedule first.");
             }
         }
 
@@ -1625,9 +1465,7 @@
             return {
                 allocatedTasks: finalAllocatedTasks,
                 totalAllocated: finalAllocatedTasks.reduce((sum, t) => sum + t.allocated, 0),
-                targetTotal,
-                totalWeight,
-                unroundedBaseUnit
+                targetTotal, totalWeight, unroundedBaseUnit
             };
         }
 
@@ -1685,7 +1523,7 @@
             activeCountBadge.textContent = `${totalItemsCount} Total Items (${allocatedTasks.length} Active)`;
 
             if (totalItemsCount === 0) {
-                masterTimelineContainer.innerHTML = `<div class="py-10 text-center text-slate-500 font-medium"><i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-purple-300 block"></i>No schedule items. Add items above to build timeline.</div>`;
+                masterTimelineContainer.innerHTML = `<div class="py-10 text-center text-slate-500 font-medium"><i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-purple-300 block"></i>No items scheduled.</div>`;
                 return;
             }
 
@@ -1740,8 +1578,7 @@
                         let minsBeforeFixed = Math.round((nextFixed.eventDate - currentCursor) / (60 * 1000));
                         if (minsBeforeFixed >= 5) {
                             masterTimelineItems.push({ 
-                                type: 'TASK', 
-                                ...task, 
+                                type: 'TASK', ...task, 
                                 title: `${task.title} (Part 1)`,
                                 allocated: minsBeforeFixed, 
                                 startTimeStr: formatTimeShort(currentCursor), 
@@ -1796,7 +1633,7 @@
                             <label for="check-${taskItem.id}" class="font-bold text-sm ${!isIncluded ? 'line-through text-slate-400' : 'text-slate-100'} truncate cursor-pointer hover:text-purple-300 transition">${escapeHtml(taskItem.title)}</label>
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
-                            <button onclick="toggleTaskInclusion(${taskItem.id})" class="pill-badge ${isIncluded ? 'badge-slate' : 'badge-red'} cursor-pointer transition hover:scale-105" title="${isIncluded ? 'Included in calculation (click to exclude)' : 'Excluded from calculation (click to include)'}">
+                            <button onclick="toggleTaskInclusion(${taskItem.id})" class="pill-badge ${isIncluded ? 'badge-slate' : 'badge-red'} cursor-pointer transition hover:scale-105">
                                 <i class="fa-solid ${isIncluded ? 'fa-eye text-emerald-300' : 'fa-eye-slash text-rose-300'} text-[10px]"></i>
                                 ${isIncluded ? 'Included' : 'Excluded'}
                             </button>
@@ -1813,15 +1650,15 @@
                             ${isIncluded && activeItemData ? activeItemData.allocated : 0} <span class="text-xs font-normal text-slate-400">mins</span>
                         </div>
                         <div class="text-right text-xs font-mono text-slate-300">
-                            ${isIncluded && activeItemData ? `<i class="fa-regular fa-clock text-pink-300"></i> ${activeItemData.startTimeStr} - ${activeItemData.endTimeStr}` : '<span class="text-slate-500 italic">Excluded from schedule</span>'}
+                            ${isIncluded && activeItemData ? `<i class="fa-regular fa-clock text-pink-300"></i> ${activeItemData.startTimeStr} - ${activeItemData.endTimeStr}` : '<span class="text-slate-500 italic">Excluded</span>'}
                         </div>
                     </div>
 
                     <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>${isIncluded && activeItemData ? `Unrounded: ${(activeItemData.exactRaw || activeItemData.allocated).toFixed(1)}m` : 'Benched'}</span>
+                        <span>${isIncluded && activeItemData ? `Raw: ${(activeItemData.exactRaw || activeItemData.allocated).toFixed(1)}m` : 'Benched'}</span>
                         <div class="flex items-center gap-2">
-                            <button onclick="openEditModal(${taskItem.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300" title="Edit Task"><i class="fa-solid fa-pen text-xs"></i></button>
-                            <button onclick="removeTask(${taskItem.id})" class="hover:text-rose-400 transition text-slate-400" title="Delete Task"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                            <button onclick="openEditModal(${taskItem.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="removeTask(${taskItem.id})" class="hover:text-rose-400 transition text-slate-400"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
                     </div>
                 `;
@@ -1891,17 +1728,13 @@
             allocatedTasks.forEach((t, i) => {
                 text += `${i + 1}. [${t.allocated}m] ${t.title} (${t.rating}x weight)\n`;
             });
-            navigator.clipboard.writeText(text).then(() => {
-                showUndoToast("Schedule Copied to Clipboard", "fa-copy");
-            });
+            navigator.clipboard.writeText(text).then(() => showUndoToast("Schedule Copied", "fa-copy"));
         }
 
         function exportScheduleTxt() {
             const { allocatedTasks } = allocateTaskTimes();
-            let text = `======================================\n`;
-            text += `AuTomator Schedule Export\n`;
-            text += `Total Allocated: ${totalDurationInput.value} mins\n`;
-            text += `======================================\n\n`;
+            let text = `AuTomator Schedule Export\n`;
+            text += `Total Allocated: ${totalDurationInput.value} mins\n\n`;
             allocatedTasks.forEach((t, i) => {
                 text += `${i + 1}. ${t.title.toUpperCase()}\n   Duration: ${t.allocated} mins\n   Weight: ${t.rating}x\n\n`;
             });
@@ -2069,8 +1902,8 @@
             bufferTimeText.textContent = `${bufferMins}m buffer`;
 
             const completedSessions = blocks.filter(b => b.type === 'WORK').length;
-            bedtimeStatusTitle.textContent = `${completedSessions} Focus Sessions Completed`;
-            bedtimeStatusSubtext.textContent = `By bedtime at ${formatTimeShort(bedtime)}, you will have completed ${focusAccumulator} mins of deep focus across ${completedSessions} sessions with ${breakAccumulator} mins of breaks.`;
+            bedtimeStatusTitle.textContent = `${completedSessions} Focus Sessions Scheduled`;
+            bedtimeStatusSubtext.textContent = `Completed ${focusAccumulator}m focus & ${breakAccumulator}m breaks before bedtime (${formatTimeShort(bedtime)}).`;
 
             renderPomoVisualTimeline(blocks, availableMins);
             renderPomoBlockCards(blocks);

@@ -634,6 +634,8 @@
         let db = null;
         let auth = null;
         let currentUser = null;
+        let cloudUnsubscribe = null;
+        let isSyncingFromCloud = false;
 
         try {
             if (firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
@@ -648,8 +650,9 @@
                         document.getElementById('userProfile').classList.remove('hidden');
                         document.getElementById('userAvatar').src = user.photoURL || '';
                         document.getElementById('userName').textContent = user.displayName || 'User';
-                        loadFromCloud();
+                        subscribeToCloudData();
                     } else {
+                        if (cloudUnsubscribe) cloudUnsubscribe();
                         currentUser = null;
                         document.getElementById('googleSignInBtn').classList.remove('hidden');
                         document.getElementById('userProfile').classList.add('hidden');
@@ -673,7 +676,7 @@
         }
 
         function saveToCloud() {
-            if (!currentUser || !db) return;
+            if (!currentUser || !db || isSyncingFromCloud) return;
             const state = {
                 tasks, fixedEvents,
                 totalDuration: totalDurationInput.value,
@@ -696,6 +699,43 @@
             db.collection('user_schedules').doc(currentUser.uid).set(state, { merge: true })
                 .then(() => { if (syncIndicator) syncIndicator.textContent = "● Synced"; })
                 .catch(() => { if (syncIndicator) syncIndicator.textContent = "○ Sync Error"; });
+        }
+
+        function subscribeToCloudData() {
+            if (!currentUser || !db) return;
+            if (cloudUnsubscribe) cloudUnsubscribe();
+        
+            cloudUnsubscribe = db.collection('user_schedules').doc(currentUser.uid)
+                .onSnapshot((doc) => {
+                    if (doc.exists && !doc.metadata.hasPendingWrites) {
+                        isSyncingFromCloud = true;
+                        const state = doc.data();
+                        if (state.tasks) tasks = state.tasks.map(t => ({ included: true, ...t }));
+                        if (state.fixedEvents) fixedEvents = state.fixedEvents;
+                        if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
+                        if (state.bedtime !== undefined) {
+                            bedtimeInput.value = state.bedtime;
+                            pomoBedTimeInput.value = state.bedtime;
+                        }
+                        if (state.startTime !== undefined) startTimeInput.value = state.startTime;
+                        if (state.autoStart !== undefined) autoStartToggle.checked = state.autoStart;
+                        if (state.workDuration !== undefined) workDurationInput.value = state.workDuration;
+                        if (state.shortBreakDuration !== undefined) shortBreakDurationInput.value = state.shortBreakDuration;
+                        if (state.longBreakDuration !== undefined) longBreakDurationInput.value = state.longBreakDuration;
+                        if (state.sessionsPerCycle !== undefined) sessionsPerCycleInput.value = state.sessionsPerCycle;
+                        if (state.isLivePomoMode !== undefined) setPomoStartMode(state.isLivePomoMode);
+                        if (state.customStartTime !== undefined) customStartTimeInput.value = state.customStartTime;
+                        if (state.integrateFixedEvents !== undefined) integrateFixedEventsToggle.checked = state.integrateFixedEvents;
+        
+                        updateFixedEventsUI();
+                        calculateAndRender();
+                        calculatePomodoroSchedule();
+                        isSyncingFromCloud = false;
+                        showUndoToast("Cloud Data Synced", "fa-cloud-arrow-down");
+                    }
+                }, (error) => {
+                    console.error("Firestore listener error:", error);
+                });
         }
 
         function loadFromCloud() {
@@ -1975,6 +2015,15 @@
                 calculatePomodoroSchedule();
             }
         });
+
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
     </script>
 </body>
 </html>

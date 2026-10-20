@@ -13,7 +13,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDK (v9 Compatibility Mode for easy Single-File Integration) -->
+    <!-- Firebase SDK (v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -153,6 +153,7 @@
         .badge-amber { background: #d97706; color: #ffffff; }
         .badge-red { background: #ef4444; color: #ffffff; }
         .badge-teal { background: #14b8a6; color: #ffffff; }
+        .badge-slate { background: #64748b; color: #ffffff; }
 
         ::-webkit-scrollbar {
             width: 8px;
@@ -395,7 +396,7 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
-                            <div class="text-[11px] text-slate-400 font-medium">Task Count</div>
+                            <div class="text-[11px] text-slate-400 font-medium">Active Tasks</div>
                             <div id="metricTaskCount" class="text-base font-bold text-white font-mono mt-0.5">0</div>
                         </div>
                         <div class="bg-black/30 border border-white/10 rounded-xl p-3 text-center min-w-[90px]">
@@ -434,7 +435,7 @@
                 <div class="aero-card-header -mx-5 -mt-5 p-4 flex items-center justify-between">
                     <div>
                         <h3 class="font-bold text-sm tracking-wide text-purple-200 uppercase flex items-center gap-2"><i class="fa-solid fa-clock text-purple-300"></i> Master Timeline & Task Schedule</h3>
-                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Higher tasks get extra minute priority on equal length ratings.</p>
+                        <p class="text-xs text-slate-400">Drag cards to reorder tasks manually. Toggle inclusion using the eye icon.</p>
                     </div>
                     <span id="activeCountBadge" class="pill-badge badge-blue">0 Items</span>
                 </div>
@@ -818,7 +819,9 @@
             db.collection('user_schedules').doc(currentUser.uid).get().then((doc) => {
                 if (doc.exists) {
                     const state = doc.data();
-                    if (state.tasks) tasks = state.tasks;
+                    if (state.tasks) {
+                        tasks = state.tasks.map(t => ({ included: true, ...t }));
+                    }
                     if (state.fixedEvents) fixedEvents = state.fixedEvents;
                     if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
                     if (state.bedtime !== undefined) {
@@ -974,16 +977,16 @@
         const pomoTotalBlockCountBadge = document.getElementById('pomoTotalBlockCountBadge');
 
         const sampleTasks = [
-            { id: 1, title: 'lang', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 2, title: 'nhs', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 3, title: 'jazz', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 4, title: 'knowledge check', rating: 1, completed: false, fixedDuration: 15, fixedStartTime: null, fixedEndTime: null },
-            { id: 5, title: 'titration', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 6, title: 'lewis', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 7, title: 'annotations + space', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 8, title: 'wk5 warmups', rating: 1, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 9, title: 'secrets of the CC', rating: 3, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
-            { id: 10, title: 'discount', rating: 2, completed: false, fixedDuration: null, fixedStartTime: null, fixedEndTime: null }
+            { id: 1, title: 'lang', rating: 3, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 2, title: 'nhs', rating: 1, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 3, title: 'jazz', rating: 3, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 4, title: 'knowledge check', rating: 1, completed: false, included: true, fixedDuration: 15, fixedStartTime: null, fixedEndTime: null },
+            { id: 5, title: 'titration', rating: 2, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 6, title: 'lewis', rating: 3, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 7, title: 'annotations + space', rating: 2, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 8, title: 'wk5 warmups', rating: 1, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 9, title: 'secrets of the CC', rating: 3, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null },
+            { id: 10, title: 'discount', rating: 2, completed: false, included: true, fixedDuration: null, fixedStartTime: null, fixedEndTime: null }
         ];
 
         const sampleEvents = [
@@ -1066,7 +1069,9 @@
             if (!data) return false;
             try {
                 const state = JSON.parse(data);
-                if (state.tasks) tasks = state.tasks;
+                if (state.tasks) {
+                    tasks = state.tasks.map(t => ({ included: true, ...t }));
+                }
                 if (state.fixedEvents) fixedEvents = state.fixedEvents;
                 if (state.totalDuration !== undefined) totalDurationInput.value = state.totalDuration;
                 if (state.bedtime !== undefined) {
@@ -1105,7 +1110,7 @@
 
         function restoreStateFromSnapshot(snapshotStr) {
             const state = JSON.parse(snapshotStr);
-            tasks = state.tasks;
+            tasks = state.tasks.map(t => ({ included: true, ...t }));
             fixedEvents = state.fixedEvents;
             totalDurationInput.value = state.totalDuration;
             if (state.bedtime) {
@@ -1388,6 +1393,7 @@
                 title: title,
                 rating: Math.max(1, Math.min(3, rating)),
                 completed: false,
+                included: true,
                 fixedDuration: null,
                 fixedStartTime: null,
                 fixedEndTime: null
@@ -1400,6 +1406,17 @@
         taskTitleInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTaskBtn.click();
         });
+
+        window.toggleTaskInclusion = function(id) {
+            pushState();
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.included = task.included !== false ? false : true;
+                calculateAndRender();
+                saveToLocalStorage();
+                showUndoToast(task.included ? `Included "${task.title}"` : `Excluded "${task.title}"`, task.included ? "fa-eye" : "fa-eye-slash");
+            }
+        };
 
         window.openEditModal = function(id, type) {
             editModalItemId.value = id;
@@ -1547,13 +1564,15 @@
 
         function allocateTaskTimes() {
             const targetTotal = getSanitizedInput(totalDurationInput, 0);
-            if (tasks.length === 0 || targetTotal <= 0) {
+            const activeTasks = tasks.filter(t => t.included !== false);
+
+            if (activeTasks.length === 0 || targetTotal <= 0) {
                 return { allocatedTasks: [], totalAllocated: 0, targetTotal, totalWeight: 0, unroundedBaseUnit: 0 };
             }
 
             let fixedSum = 0;
             const dynamicTasks = [];
-            tasks.forEach((t, idx) => {
+            activeTasks.forEach((t, idx) => {
                 if (t.fixedDuration !== null && t.fixedDuration > 0) fixedSum += t.fixedDuration;
                 else dynamicTasks.push({ ...t, originalIndex: idx });
             });
@@ -1595,7 +1614,7 @@
             dynamicAllocated.sort((a, b) => a.originalIndex - b.originalIndex);
 
             const dynamicMap = new Map(dynamicAllocated.map(t => [t.id, t]));
-            const finalAllocatedTasks = tasks.map(t => {
+            const finalAllocatedTasks = activeTasks.map(t => {
                 if (t.fixedDuration !== null && t.fixedDuration > 0) {
                     return { ...t, exactRaw: t.fixedDuration, allocated: t.fixedDuration, isTaskFixed: true };
                 } else {
@@ -1622,7 +1641,7 @@
                 matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation text-rose-200"></i> INVALID TIME`;
                 matchStatusBadge.className = "pill-badge badge-red";
             } else if (allocatedTasks.length === 0) {
-                matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-info text-amber-950"></i> NO TASKS`;
+                matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-info text-amber-950"></i> NO ACTIVE TASKS`;
                 matchStatusBadge.className = "pill-badge badge-yellow";
             } else if (totalAllocated === targetTotal) {
                 matchStatusBadge.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-950"></i> EXACT MATCH`;
@@ -1662,8 +1681,8 @@
 
         function renderMasterTimeline(allocatedTasks) {
             masterTimelineContainer.innerHTML = '';
-            const totalItemsCount = allocatedTasks.length + fixedEvents.length;
-            activeCountBadge.textContent = `${totalItemsCount} Schedule Items`;
+            const totalItemsCount = tasks.length + fixedEvents.length;
+            activeCountBadge.textContent = `${totalItemsCount} Total Items (${allocatedTasks.length} Active)`;
 
             if (totalItemsCount === 0) {
                 masterTimelineContainer.innerHTML = `<div class="py-10 text-center text-slate-500 font-medium"><i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-purple-300 block"></i>No schedule items. Add items above to build timeline.</div>`;
@@ -1751,110 +1770,109 @@
                 }
             }
 
-            masterTimelineItems.forEach((item) => {
+            const activeTaskMap = new Map(masterTimelineItems.filter(i => i.type === 'TASK').map(i => [i.id, i]));
+
+            tasks.forEach((taskItem) => {
+                const originalIndex = tasks.findIndex(t => t.id === taskItem.id);
+                const isIncluded = taskItem.included !== false;
+                const activeItemData = activeTaskMap.get(taskItem.id);
+
                 const card = document.createElement('div');
 
-                if (item.type === 'FIXED') {
-                    card.className = "aero-card p-3.5 border-l-4 border-l-amber-500 bg-amber-950/20 flex items-center justify-between text-xs";
-                    card.innerHTML = `
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <span class="pill-badge badge-amber"><i class="fa-solid fa-lock text-[10px] text-white"></i> Fixed Event</span>
-                            <span class="font-bold text-amber-200 truncate">${escapeHtml(item.title)}</span>
+                let ratingBadge = taskItem.rating === 3 ? 'badge-orange' : (taskItem.rating === 2 ? 'badge-purple' : 'badge-blue');
+                let ratingLabel = taskItem.rating === 3 ? '3x Long' : (taskItem.rating === 2 ? '2x Medium' : '1x Short');
+                const isFixedTask = taskItem.fixedDuration !== null && taskItem.fixedDuration > 0;
+
+                card.className = `draggable-card aero-card p-4 space-y-2.5 relative flex flex-col justify-between transition hover:border-white/30 ${!isIncluded ? 'opacity-40 border-slate-700 bg-slate-950/40' : (taskItem.completed ? 'opacity-50' : '')}`;
+                card.setAttribute('draggable', 'true');
+                card.setAttribute('data-id', taskItem.id);
+                card.setAttribute('data-index', originalIndex);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <div class="cursor-grab text-slate-500 hover:text-purple-300 px-1 py-0.5"><i class="fa-solid fa-grip-vertical"></i></div>
+                            <input type="checkbox" id="check-${taskItem.id}" ${taskItem.completed ? 'checked' : ''} class="w-4 h-4 rounded border-white/20 bg-black/40 text-purple-600 focus:ring-purple-500 cursor-pointer">
+                            <label for="check-${taskItem.id}" class="font-bold text-sm ${!isIncluded ? 'line-through text-slate-400' : 'text-slate-100'} truncate cursor-pointer hover:text-purple-300 transition">${escapeHtml(taskItem.title)}</label>
                         </div>
-                        <div class="flex items-center gap-3 shrink-0 font-mono text-slate-300">
-                            <span class="text-amber-300 font-semibold">${item.duration} mins</span>
-                            <span class="text-slate-200 flex items-center gap-1"><i class="fa-regular fa-clock text-amber-300 mr-0.5"></i> ${item.startTimeStr} - ${item.endTimeStr}</span>
-                            <button onclick="openEditModal(${item.id}, 'FIXED')" class="text-slate-400 hover:text-purple-300 transition ml-2"><i class="fa-solid fa-pen text-xs"></i></button>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="toggleTaskInclusion(${taskItem.id})" class="pill-badge ${isIncluded ? 'badge-slate' : 'badge-red'} cursor-pointer transition hover:scale-105" title="${isIncluded ? 'Included in calculation (click to exclude)' : 'Excluded from calculation (click to include)'}">
+                                <i class="fa-solid ${isIncluded ? 'fa-eye text-emerald-300' : 'fa-eye-slash text-rose-300'} text-[10px]"></i>
+                                ${isIncluded ? 'Included' : 'Excluded'}
+                            </button>
+                            <button onclick="openEditModal(${taskItem.id}, 'TASK')" class="pill-badge ${isFixedTask ? 'badge-teal' : 'aero-btn-secondary text-slate-300'} cursor-pointer">
+                                <i class="fa-solid ${isFixedTask ? 'fa-clock' : 'fa-wand-magic-sparkles'} text-[10px]"></i>
+                                ${isFixedTask ? (taskItem.fixedStartTime ? `Fixed (${taskItem.fixedStartTime}-${taskItem.fixedEndTime})` : `Fixed (${taskItem.fixedDuration}m)`) : 'Auto Time'}
+                            </button>
+                            <span class="pill-badge ${ratingBadge}">${ratingLabel}</span>
                         </div>
-                    `;
-                } else {
-                    let ratingBadge = item.rating === 3 ? 'badge-orange' : (item.rating === 2 ? 'badge-purple' : 'badge-blue');
-                    let ratingLabel = item.rating === 3 ? '3x Long' : (item.rating === 2 ? '2x Medium' : '1x Short');
-                    const isFixedTask = item.fixedDuration !== null && item.fixedDuration > 0;
-                    const originalIndex = tasks.findIndex(t => t.id === item.id);
+                    </div>
 
-                    card.className = `draggable-card aero-card p-4 space-y-2.5 relative flex flex-col justify-between transition hover:border-white/30 ${item.completed ? 'opacity-50' : ''}`;
-                    card.setAttribute('draggable', 'true');
-                    card.setAttribute('data-id', item.id);
-                    card.setAttribute('data-index', originalIndex);
-
-                    card.innerHTML = `
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <div class="cursor-grab text-slate-500 hover:text-purple-300 px-1 py-0.5"><i class="fa-solid fa-grip-vertical"></i></div>
-                                <input type="checkbox" id="check-${item.id}" ${item.completed ? 'checked' : ''} class="w-4 h-4 rounded border-white/20 bg-black/40 text-purple-600 focus:ring-purple-500 cursor-pointer">
-                                <label for="check-${item.id}" class="font-bold text-sm text-slate-100 truncate cursor-pointer hover:text-purple-300 transition">${escapeHtml(item.title)}</label>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick="openEditModal(${item.id}, 'TASK')" class="pill-badge ${isFixedTask ? 'badge-teal' : 'aero-btn-secondary text-slate-300'} cursor-pointer">
-                                    <i class="fa-solid ${isFixedTask ? 'fa-clock' : 'fa-wand-magic-sparkles'} text-[10px]"></i>
-                                    ${isFixedTask ? (item.fixedStartTime ? `Fixed (${item.fixedStartTime}-${item.fixedEndTime})` : `Fixed (${item.fixedDuration}m)`) : 'Auto Time'}
-                                </button>
-                                <span class="pill-badge ${ratingBadge}">${ratingLabel}</span>
-                            </div>
+                    <div class="flex items-baseline justify-between pt-1">
+                        <div class="text-2xl font-black ${isIncluded ? 'text-pink-300' : 'text-slate-500'} font-mono tracking-tight flex items-baseline gap-1.5">
+                            ${isIncluded && activeItemData ? activeItemData.allocated : 0} <span class="text-xs font-normal text-slate-400">mins</span>
                         </div>
-
-                        <div class="flex items-baseline justify-between pt-1">
-                            <div class="text-2xl font-black text-pink-300 font-mono tracking-tight flex items-baseline gap-1.5">${item.allocated} <span class="text-xs font-normal text-slate-400">mins</span></div>
-                            <div class="text-right text-xs font-mono text-slate-300"><i class="fa-regular fa-clock text-pink-300"></i> ${item.startTimeStr} - ${item.endTimeStr}</div>
+                        <div class="text-right text-xs font-mono text-slate-300">
+                            ${isIncluded && activeItemData ? `<i class="fa-regular fa-clock text-pink-300"></i> ${activeItemData.startTimeStr} - ${activeItemData.endTimeStr}` : '<span class="text-slate-500 italic">Excluded from schedule</span>'}
                         </div>
+                    </div>
 
-                        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
-                            <span>Unrounded: ${(item.exactRaw || item.allocated).toFixed(1)}m</span>
-                            <div class="flex items-center gap-2">
-                                <button onclick="openEditModal(${item.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300" title="Edit Task"><i class="fa-solid fa-pen text-xs"></i></button>
-                                <button onclick="removeTask(${item.id})" class="hover:text-rose-400 transition text-slate-400" title="Delete Task"><i class="fa-solid fa-trash-can text-xs"></i></button>
-                            </div>
+                    <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+                        <span>${isIncluded && activeItemData ? `Unrounded: ${(activeItemData.exactRaw || activeItemData.allocated).toFixed(1)}m` : 'Benched'}</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openEditModal(${taskItem.id}, 'TASK')" class="hover:text-purple-300 transition text-slate-300" title="Edit Task"><i class="fa-solid fa-pen text-xs"></i></button>
+                            <button onclick="removeTask(${taskItem.id})" class="hover:text-rose-400 transition text-slate-400" title="Delete Task"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
-                    `;
+                    </div>
+                `;
 
-                    card.addEventListener('dragstart', (e) => {
-                        dragSourceIndex = parseInt(card.getAttribute('data-index'), 10);
-                        card.classList.add('dragging');
-                        isDragging = true;
-                        e.dataTransfer.effectAllowed = 'move';
-                    });
-                    card.addEventListener('dragend', () => {
-                        card.classList.remove('dragging');
-                        isDragging = false;
-                        if (autoScrollFrame) {
-                            cancelAnimationFrame(autoScrollFrame);
-                            autoScrollFrame = null;
-                        }
-                        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-                    });
-                    card.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        card.classList.add('drag-over');
-                    });
-                    card.addEventListener('dragleave', () => {
-                        card.classList.remove('drag-over');
-                    });
-                    card.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        card.classList.remove('drag-over');
-                        const targetIndex = parseInt(card.getAttribute('data-index'), 10);
-                        if (dragSourceIndex !== null && !isNaN(dragSourceIndex) && dragSourceIndex >= 0 && targetIndex !== null && !isNaN(targetIndex) && targetIndex >= 0 && dragSourceIndex !== targetIndex) {
-                            pushState();
-                            const [movedItem] = tasks.splice(dragSourceIndex, 1);
-                            tasks.splice(targetIndex, 0, movedItem);
-                            dragSourceIndex = null;
-                            calculateAndRender();
-                            saveToLocalStorage();
-                        }
-                    });
-
-                    const chk = card.querySelector(`#check-${item.id}`);
-                    if (chk) {
-                        chk.addEventListener('change', (e) => {
-                            pushState();
-                            const found = tasks.find(x => x.id === item.id);
-                            if (found) found.completed = e.target.checked;
-                            calculateAndRender();
-                            saveToLocalStorage();
-                        });
+                card.addEventListener('dragstart', (e) => {
+                    dragSourceIndex = parseInt(card.getAttribute('data-index'), 10);
+                    card.classList.add('dragging');
+                    isDragging = true;
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                    isDragging = false;
+                    if (autoScrollFrame) {
+                        cancelAnimationFrame(autoScrollFrame);
+                        autoScrollFrame = null;
                     }
+                    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                });
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    card.classList.add('drag-over');
+                });
+                card.addEventListener('dragleave', () => {
+                    card.classList.remove('drag-over');
+                });
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-over');
+                    const targetIndex = parseInt(card.getAttribute('data-index'), 10);
+                    if (dragSourceIndex !== null && !isNaN(dragSourceIndex) && dragSourceIndex >= 0 && targetIndex !== null && !isNaN(targetIndex) && targetIndex >= 0 && dragSourceIndex !== targetIndex) {
+                        pushState();
+                        const [movedItem] = tasks.splice(dragSourceIndex, 1);
+                        tasks.splice(targetIndex, 0, movedItem);
+                        dragSourceIndex = null;
+                        calculateAndRender();
+                        saveToLocalStorage();
+                    }
+                });
+
+                const chk = card.querySelector(`#check-${taskItem.id}`);
+                if (chk) {
+                    chk.addEventListener('change', (e) => {
+                        pushState();
+                        const found = tasks.find(x => x.id === taskItem.id);
+                        if (found) found.completed = e.target.checked;
+                        calculateAndRender();
+                        saveToLocalStorage();
+                    });
                 }
+
                 masterTimelineContainer.appendChild(card);
             });
         }

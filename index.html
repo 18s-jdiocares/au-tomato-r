@@ -712,7 +712,6 @@
         // ==========================================
         // FIREBASE AUTHENTICATION & CLOUD SYNC CONFIG
         // ==========================================
-        // Replace with your Firebase Project Config credentials
         const firebaseConfig = {
             apiKey: "YOUR_FIREBASE_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -726,7 +725,6 @@
         let auth = null;
         let currentUser = null;
 
-        // Initialize Firebase safely
         try {
             if (firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
                 firebase.initializeApp(firebaseConfig);
@@ -1000,6 +998,42 @@
         let isLivePomoMode = true;
         let lastCalculatedPomoFocusMins = 0;
         let dragSourceIndex = null;
+
+        // Auto-scroll state during drag operations
+        let dragY = 0;
+        let autoScrollFrame = null;
+        let isDragging = false;
+
+        document.addEventListener('dragover', (e) => {
+            if (!isDragging) return;
+            dragY = e.clientY;
+            
+            if (!autoScrollFrame) {
+                autoScrollFrame = requestAnimationFrame(handleAutoScroll);
+            }
+        });
+
+        function handleAutoScroll() {
+            if (!isDragging) {
+                autoScrollFrame = null;
+                return;
+            }
+
+            const edgeZone = 80;
+            const maxSpeed = 18;
+            const viewportHeight = window.innerHeight;
+
+            if (dragY < edgeZone) {
+                const speed = Math.max(2, Math.round((1 - dragY / edgeZone) * maxSpeed));
+                window.scrollBy(0, -speed);
+            } else if (dragY > viewportHeight - edgeZone) {
+                const distanceToBottom = viewportHeight - dragY;
+                const speed = Math.max(2, Math.round((1 - distanceToBottom / edgeZone) * maxSpeed));
+                window.scrollBy(0, speed);
+            }
+
+            autoScrollFrame = requestAnimationFrame(handleAutoScroll);
+        }
 
         const colorPalette = [
             'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-cyan-500',
@@ -1777,10 +1811,16 @@
                     card.addEventListener('dragstart', (e) => {
                         dragSourceIndex = parseInt(card.getAttribute('data-index'), 10);
                         card.classList.add('dragging');
+                        isDragging = true;
                         e.dataTransfer.effectAllowed = 'move';
                     });
                     card.addEventListener('dragend', () => {
                         card.classList.remove('dragging');
+                        isDragging = false;
+                        if (autoScrollFrame) {
+                            cancelAnimationFrame(autoScrollFrame);
+                            autoScrollFrame = null;
+                        }
                         document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
                     });
                     card.addEventListener('dragover', (e) => {
